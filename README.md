@@ -1,48 +1,43 @@
 
-# Gemini MCP Tool
+# OpenCode MCP Tool
 
 <div align="center">
 
-[![GitHub Release](https://img.shields.io/github/v/release/jamubc/gemini-mcp-tool?logo=github&label=GitHub)](https://github.com/jamubc/gemini-mcp-tool/releases)
-[![npm version](https://img.shields.io/npm/v/gemini-mcp-tool)](https://www.npmjs.com/package/gemini-mcp-tool)
-[![npm downloads](https://img.shields.io/npm/dt/gemini-mcp-tool)](https://www.npmjs.com/package/gemini-mcp-tool)
+[![GitHub Release](https://img.shields.io/github/v/release/jamubc/opencode-mcp-tool?logo=github&label=GitHub)](https://github.com/jamubc/opencode-mcp-tool/releases)
+[![npm version](https://img.shields.io/npm/v/opencode-mcp-tool)](https://www.npmjs.com/package/opencode-mcp-tool)
+[![npm downloads](https://img.shields.io/npm/dt/opencode-mcp-tool)](https://www.npmjs.com/package/opencode-mcp-tool)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Open Source](https://img.shields.io/badge/Open%20Source-❤️-red.svg)](https://github.com/jamubc/gemini-mcp-tool)
+[![Open Source](https://img.shields.io/badge/Open%20Source-❤️-red.svg)](https://github.com/jamubc/opencode-mcp-tool)
 
 </div>
 
-> 📚 **[View Full Documentation](https://jamubc.github.io/gemini-mcp-tool/)** - Search me!, Examples, FAQ, Troubleshooting, Best Practices
+> 📚 **[View Full Documentation](https://jamubc.github.io/opencode-mcp-tool/)** - Examples, FAQ, Troubleshooting, Best Practices
 
-This is a simple Model Context Protocol (MCP) server that allows AI assistants to interact with the [Gemini CLI](https://github.com/google-gemini/gemini-cli). It enables the AI to leverage the power of Gemini's massive token window for large analysis, especially with large files and codebases using the `@` syntax for direction.
+This is a Model Context Protocol (MCP) server that allows AI assistants to interact with the [OpenCode CLI](https://github.com/fictiverse/opencode). It enables AI assistants to leverage multiple AI models through a unified interface, with features like plan mode for structured thinking and extensive model selection.
 
-- Ask gemini natural questions, through claude or Brainstorm new ideas in a party of 3!
+- Ask questions through multiple AI models via Claude or other MCP clients
+- Use plan mode for structured analysis and safer operations
 
-<a href="https://glama.ai/mcp/servers/@jamubc/gemini-mcp-tool">
-  <img width="380" height="200" src="https://glama.ai/mcp/servers/@jamubc/gemini-mcp-tool/badge" alt="Gemini Tool MCP server" />
-</a>
+## TLDR: [![Claude](https://img.shields.io/badge/Claude-D97757?logo=claude&logoColor=fff)](#) + Multiple AI Models via OpenCode
 
-## TLDR: [![Claude](https://img.shields.io/badge/Claude-D97757?logo=claude&logoColor=fff)](#) + [![Google Gemini](https://img.shields.io/badge/Google%20Gemini-886FBF?logo=googlegemini&logoColor=fff)](#)
-
-
-**Goal**: Use Gemini's powerful analysis capabilities directly in Claude Code to save tokens and analyze large files.
+**Goal**: Use OpenCode's multi-model capabilities directly in Claude Code with flexible model selection and plan mode features.
 
 ## Prerequisites
 
 Before using this tool, ensure you have:
 
 1. **[Node.js](https://nodejs.org/)** (v16.0.0 or higher)
-2. **[Google Gemini CLI](https://github.com/google-gemini/gemini-cli)** installed and configured
-
+2. **[OpenCode CLI](https://github.com/fictiverse/opencode)** installed and configured
 
 ### One-Line Setup
 
 ```bash
-claude mcp add gemini-cli -- npx -y gemini-mcp-tool
+claude mcp add opencode-cli -- npx -y opencode-mcp-tool -- --model google/gemini-2.5-pro
 ```
 
 ### Verify Installation
 
-Type `/mcp` inside Claude Code to verify the gemini-cli MCP is active.
+Type `/mcp` inside Claude Code to verify the opencode-cli MCP is active.
 
 ---
 
@@ -52,9 +47,9 @@ If you already have it configured in Claude Desktop:
 
 1. Add to your Claude Desktop config:
 ```json
-"gemini-cli": {
+"opencode-cli": {
   "command": "npx",
-  "args": ["-y", "gemini-mcp-tool"]
+  "args": ["-y", "opencode-mcp-tool", "--", "--model", "google/gemini-2.5-pro"]
 }
 ```
 
@@ -65,7 +60,7 @@ claude mcp add-from-claude-desktop
 
 ## Configuration
 
-Register the MCP server with your MCP client:
+Register the MCP server with your MCP client. **Note: The server requires a primary model to be specified.**
 
 ### For NPX Usage (Recommended)
 
@@ -74,9 +69,9 @@ Add this configuration to your Claude Desktop config file:
 ```json
 {
   "mcpServers": {
-    "gemini-cli": {
+    "opencode-cli": {
       "command": "npx",
-      "args": ["-y", "gemini-mcp-tool"]
+      "args": ["-y", "opencode-mcp-tool", "--", "--model", "google/gemini-2.5-pro", "--fallback-model", "google/gemini-2.5-flash"]
     }
   }
 }
@@ -89,8 +84,9 @@ If you installed globally, use this configuration instead:
 ```json
 {
   "mcpServers": {
-    "gemini-cli": {
-      "command": "gemini-mcp"
+    "opencode-cli": {
+      "command": "opencode-mcp",
+      "args": ["--model", "google/gemini-2.5-pro", "--fallback-model", "google/gemini-2.5-flash"]
     }
   }
 }
