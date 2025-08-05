@@ -19,7 +19,7 @@ export interface UnifiedTool {
   };
   
   execute: (args: ToolArguments, onProgress?: (newOutput: string) => void) => Promise<string>;
-  category?: 'simple' | 'gemini' | 'utility';
+  category?: 'simple' | 'opencode' | 'utility';
 }
 
 export const toolRegistry: UnifiedTool[] = [];
