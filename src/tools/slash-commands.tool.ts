@@ -10,8 +10,6 @@ import {
 const slashCommandArgsSchema = z.object({
   prompt: z.string().min(1).describe("Analysis request. Use @ syntax to include files (e.g., '@largefile.js explain what this does') or ask general questions"),
   model: z.string().optional().describe("Optional model to use (e.g., 'google/gemini-2.5-flash'). If not specified, uses the primary model configured at server startup."),
-  chunkIndex: z.union([z.number(), z.string()]).optional().describe("Which chunk to return (1-based)"),
-  chunkCacheKey: z.string().optional().describe("Optional cache key for continuation"),
 });
 
 // Shared execution logic
@@ -20,7 +18,7 @@ async function executeSlashCommand(
   mode: string, 
   onProgress?: (newOutput: string) => void
 ): Promise<string> {
-  const { prompt, model, chunkIndex, chunkCacheKey } = args;
+  const { prompt, model } = args;
   
   if (!prompt?.trim()) { 
     throw new Error(ERROR_MESSAGES.NO_PROMPT_PROVIDED); 

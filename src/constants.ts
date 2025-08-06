@@ -93,8 +93,6 @@ export interface ToolArguments {
   prompt?: string;
   model?: string;
   mode?: string; // Generic mode parameter (plan, build, or custom)
-  chunkIndex?: number | string; // Which chunk to return (1-based)
-  chunkCacheKey?: string; // Optional cache key for continuation
   message?: string; // For Ping tool -- Un-used.
   
   // --> new tool

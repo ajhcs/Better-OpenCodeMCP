@@ -10,8 +10,6 @@ const askOpenCodeArgsSchema = z.object({
   prompt: z.string().min(1).describe("Analysis request. Use @ syntax to include files (e.g., '@largefile.js explain what this does') or ask general questions"),
   model: z.string().optional().describe("Optional model to use (e.g., 'google/gemini-2.5-flash'). If not specified, uses the primary model configured at server startup."),
   mode: z.string().default("plan").describe("Execution mode: 'plan' for structured analysis, 'build' for immediate execution, or custom mode string"),
-  chunkIndex: z.union([z.number(), z.string()]).optional().describe("Which chunk to return (1-based)"),
-  chunkCacheKey: z.string().optional().describe("Optional cache key for continuation"),
 });
 
 export const askOpenCodeTool: UnifiedTool = {
@@ -23,7 +21,7 @@ export const askOpenCodeTool: UnifiedTool = {
   },
   category: 'opencode',
   execute: async (args, onProgress) => {
-    const { prompt, model, mode, chunkIndex, chunkCacheKey } = args; 
+    const { prompt, model, mode } = args; 
     if (!prompt?.trim()) { 
       throw new Error(ERROR_MESSAGES.NO_PROMPT_PROVIDED); 
     }
