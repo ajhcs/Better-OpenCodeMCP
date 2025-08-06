@@ -1,6 +1,6 @@
 # Best Practices
 
-Get the most out of Gemini MCP Tool with these proven practices.
+Get the most out of OpenCode MCP Tool with these proven practices.
 
 ## File Selection
 
@@ -49,10 +49,10 @@ Include configuration with implementation:
 
 ## Token Management
 
-### Gemini Model Selection
-- **Quick tasks**: Use Flash (1M tokens)
-- **Full analysis**: Use Pro (2M tokens)
-- **Simple queries**: Use Flash-8B
+### OpenCode Model Selection
+- **Quick tasks**: Use gemini-2.5-flash (1M tokens)
+- **Full analysis**: Use gemini-2.5-pro (2M tokens)
+- **Simple queries**: Use gemini-2.5-flash
 
 ### Efficient File Inclusion
 ```bash
@@ -76,7 +76,7 @@ Include configuration with implementation:
 ### Save Context Between Sessions
 ```bash
 # Create a context file
-/gemini-cli:analyze @previous-analysis.md @src/new-feature.js 
+/opencode:analyze @previous-analysis.md @src/new-feature.js 
 continue from our last discussion
 ```
 
@@ -120,7 +120,7 @@ Always include full error messages and stack traces when debugging.
 
 ### Comprehensive Security Checks
 ```bash
-/gemini-cli:analyze @src/**/*.js @package.json @.env.example
+/opencode:analyze @src/**/*.js @package.json @.env.example
 - Check for hardcoded secrets
 - Review authentication logic
 - Identify OWASP vulnerabilities
@@ -178,7 +178,7 @@ Always include full error messages and stack traces when debugging.
 
 ### Pre-commit Reviews
 ```bash
-alias gemini-review='/gemini-cli:analyze @$(git diff --staged --name-only) review staged changes'
+alias opencode-review='/opencode:analyze @$(git diff --staged --name-only) review staged changes'
 ```
 
 ### Daily Development
@@ -210,7 +210,7 @@ Check for:
 ```
 
 ### 3. Learn from Patterns
-When Gemini suggests improvements, ask:
+When OpenCode suggests improvements, ask:
 ```bash
 "explain why this approach is better"
 "show me more examples of this pattern"

@@ -28,7 +28,7 @@
       
       <div class="support-options">
         <a 
-          href="https://github.com/sponsors/jamubc" 
+          href="https://github.com/sponsors/frap129" 
           target="_blank" 
           rel="noopener"
           class="support-button support-button--primary"
@@ -40,16 +40,6 @@
           <span class="button-text">Sponsor on GitHub</span>
         </a>
 
-        <a 
-          href="https://ko-fi.com/jamubc" 
-          target="_blank" 
-          rel="noopener"
-          class="support-button support-button--secondary"
-          title="Buy me a coffee"
-        >
-          <span class="support-icon">☕</span>
-          <span class="button-text">Buy me a coffee</span>
-        </a>
       </div>
 
       <div class="support-benefits">

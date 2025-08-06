@@ -4,18 +4,18 @@ Execute code safely in an isolated environment.
 
 ## What is Sandbox Mode?
 
-Sandbox mode allows Gemini to write and test code in a secure, isolated environment without affecting your system.
+Sandbox mode allows OpenCode to write and test code in a secure, isolated environment without affecting your system.
 
 ## Basic Usage
 
 ```
-/gemini-cli:sandbox create a Python script that sorts a list
+/opencode:sandbox create a Python script that sorts a list
 ```
 
 ## How It Works
 
 1. **Request** → You ask for code to be created/tested
-2. **Generation** → Gemini writes the code
+2. **Generation** → OpenCode writes the code
 3. **Execution** → Code runs in isolated environment
 4. **Results** → Output returned safely
 
@@ -23,17 +23,17 @@ Sandbox mode allows Gemini to write and test code in a secure, isolated environm
 
 ### Algorithm Testing
 ```
-/gemini-cli:sandbox implement and test quicksort in JavaScript
+/opencode:sandbox implement and test quicksort in JavaScript
 ```
 
 ### Data Processing
 ```
-/gemini-cli:sandbox parse this CSV and show statistics: [data]
+/opencode:sandbox parse this CSV and show statistics: [data]
 ```
 
 ### Proof of Concepts
 ```
-/gemini-cli:sandbox create a working web scraper example
+/opencode:sandbox create a working web scraper example
 ```
 
 ## Safety Features
@@ -92,15 +92,15 @@ show example requests and responses
 
 ### Testing Algorithms
 ```
-/gemini-cli:sandbox benchmark bubble sort vs quick sort with 1000 items
+/opencode:sandbox benchmark bubble sort vs quick sort with 1000 items
 ```
 
 ### Learning Code
 ```
-/gemini-cli:sandbox show me how promises work in JavaScript with examples
+/opencode:sandbox show me how promises work in JavaScript with examples
 ```
 
 ### Debugging
 ```
-/gemini-cli:sandbox why does this code fail: [paste code]
+/opencode:sandbox why does this code fail: [paste code]
 ```

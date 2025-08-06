@@ -23,7 +23,7 @@
       
       <div class="hero-actions">
         <a 
-          href="https://github.com/sponsors/jamubc" 
+          href="https://github.com/sponsors/frap129" 
           target="_blank"
           rel="noopener"
           class="action-button action-primary"
@@ -35,7 +35,7 @@
         </a>
 
         <a 
-          href="https://github.com/jamubc/gemini-mcp-tool" 
+          href="https://github.com/frap129/opencode-mcp-tool" 
           target="_blank"
           rel="noopener"
           class="action-button action-primary"
@@ -46,15 +46,6 @@
           Star on GitHub
         </a>
         
-        <a 
-          href="https://ko-fi.com/jamubc" 
-          target="_blank"
-          rel="noopener"
-          class="action-button action-secondary"
-        >
-          <span class="button-icon">☕</span>
-          Buy me a coffee
-        </a>
       </div>
     </div>
   </div>

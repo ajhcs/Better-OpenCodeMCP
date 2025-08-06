@@ -3,15 +3,15 @@
 
 <div align="center">
 
-[![GitHub Release](https://img.shields.io/github/v/release/jamubc/opencode-mcp-tool?logo=github&label=GitHub)](https://github.com/jamubc/opencode-mcp-tool/releases)
+[![GitHub Release](https://img.shields.io/github/v/release/frap129/opencode-mcp-tool?logo=github&label=GitHub)](https://github.com/frap129/opencode-mcp-tool/releases)
 [![npm version](https://img.shields.io/npm/v/opencode-mcp-tool)](https://www.npmjs.com/package/opencode-mcp-tool)
 [![npm downloads](https://img.shields.io/npm/dt/opencode-mcp-tool)](https://www.npmjs.com/package/opencode-mcp-tool)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Open Source](https://img.shields.io/badge/Open%20Source-❤️-red.svg)](https://github.com/jamubc/opencode-mcp-tool)
+[![Open Source](https://img.shields.io/badge/Open%20Source-❤️-red.svg)](https://github.com/frap129/opencode-mcp-tool)
 
 </div>
 
-> 📚 **[View Full Documentation](https://jamubc.github.io/opencode-mcp-tool/)** - Examples, FAQ, Troubleshooting, Best Practices
+> 📚 **[View Full Documentation](https://frap129.github.io/opencode-mcp-tool/)** - Examples, FAQ, Troubleshooting, Best Practices
 
 This is a Model Context Protocol (MCP) server that allows AI assistants to interact with the [OpenCode CLI](https://github.com/fictiverse/opencode). It enables AI assistants to leverage multiple AI models through a unified interface, with features like plan mode for structured thinking and extensive model selection.
 
@@ -103,55 +103,55 @@ After updating the configuration, restart your terminal session.
 
 ## Example Workflow
 
-- **Natural language**: "use gemini to explain index.html", "understand the massive project using gemini", "ask gemini to search for latest news"
-- **Claude Code**: Type `/gemini-cli` and commands will populate in Claude Code's interface.
+- **Natural language**: "use opencode to explain index.html", "understand the massive project using opencode", "ask opencode to search for latest news"
+- **Claude Code**: Type `/opencode` and commands will populate in Claude Code's interface.
 
 ## Usage Examples
 
 ### With File References (using @ syntax)
 
-- `ask gemini to analyze @src/main.js and explain what it does`
-- `use gemini to summarize @. the current directory`
+- `ask opencode to analyze @src/main.js and explain what it does`
+- `use opencode to summarize @. the current directory`
 - `analyze @package.json and tell me about dependencies`
 
 ### General Questions (without files)
 
-- `ask gemini to search for the latest tech news`
-- `use gemini to explain div centering`
-- `ask gemini about best practices for React development related to @file_im_confused_about`
+- `ask opencode to search for the latest tech news`
+- `use opencode to explain div centering`
+- `ask opencode about best practices for React development related to @file_im_confused_about`
 
-### Using Gemini CLI's Sandbox Mode (-s)
+### Using OpenCode's Plan Mode
 
-The sandbox mode allows you to safely test code changes, run scripts, or execute potentially risky operations in an isolated environment.
+The plan mode allows you to safely test code changes, run scripts, or execute potentially risky operations with structured planning.
 
-- `use gemini sandbox to create and run a Python script that processes data`
-- `ask gemini to safely test @script.py and explain what it does`
-- `use gemini sandbox to install numpy and create a data visualization`
+- `use opencode plan mode to create and run a Python script that processes data`
+- `ask opencode to safely test @script.py and explain what it does`
+- `use opencode plan mode to install numpy and create a data visualization`
 - `test this code safely: Create a script that makes HTTP requests to an API`
 
 ### Tools (for the AI)
 
 These tools are designed to be used by the AI assistant.
 
-- **`ask-gemini`**: Asks Google Gemini for its perspective. Can be used for general questions or complex analysis of files.
+- **`ask-opencode`**: Asks OpenCode for analysis using multiple AI models. Can be used for general questions or complex analysis of files.
   - **`prompt`** (required): The analysis request. Use the `@` syntax to include file or directory references (e.g., `@src/main.js explain this code`) or ask general questions (e.g., `Please use a web search to find the latest news stories`).
-  - **`model`** (optional): The Gemini model to use. Defaults to `gemini-2.5-pro`.
-  - **`sandbox`** (optional): Set to `true` to run in sandbox mode for safe code execution.
-- **`sandbox-test`**: Safely executes code or commands in Gemini's sandbox environment. Always runs in sandbox mode.
-  - **`prompt`** (required): Code testing request (e.g., `Create and run a Python script that...` or `@script.py Run this safely`).
-  - **`model`** (optional): The Gemini model to use.
+  - **`model`** (optional): The model to use. Defaults to `google/gemini-2.5-pro`.
+  - **`planMode`** (optional): Set to `true` to run in plan mode for structured analysis.
+- **`timeout-test`**: Tests timeout handling for long-running operations.
+  - **`duration`** (required): Duration in milliseconds for the test.
+  - **`model`** (optional): The model to use for testing.
 - **`Ping`**: A simple test tool that echoes back a message.
-- **`Help`**: Shows the Gemini CLI help text.
+- **`Help`**: Shows the OpenCode CLI help text.
 
 ### Slash Commands (for the User)
 
 You can use these commands directly in Claude Code's interface (compatibility with other clients has not been tested).
 
-- **/analyze**: Analyzes files or directories using Gemini, or asks general questions.
+- **/analyze**: Analyzes files or directories using OpenCode, or asks general questions.
   - **`prompt`** (required): The analysis prompt. Use `@` syntax to include files (e.g., `/analyze prompt:@src/ summarize this directory`) or ask general questions (e.g., `/analyze prompt:Please use a web search to find the latest news stories`).
-- **/sandbox**: Safely tests code or scripts in Gemini's sandbox environment.
-  - **`prompt`** (required): Code testing request (e.g., `/sandbox prompt:Create and run a Python script that processes CSV data` or `/sandbox prompt:@script.py Test this script safely`).
-- **/help**: Displays the Gemini CLI help information.
+- **/plan**: Uses plan mode for structured analysis and safer operations.
+  - **`prompt`** (required): Analysis request (e.g., `/plan prompt:Create and run a Python script that processes CSV data` or `/plan prompt:@script.py Analyze this script safely`).
+- **/help**: Displays the OpenCode CLI help information.
 - **/ping**: Tests the connection to the server.
   - **`message`** (optional): A message to echo back.
 

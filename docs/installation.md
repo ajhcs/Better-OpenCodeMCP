@@ -1,12 +1,12 @@
 # Installation
 
-Multiple ways to install Gemini MCP Tool, depending on your needs.
+Multiple ways to install OpenCode MCP Tool, depending on your needs.
 
 ## Prerequisites
 
 - Node.js v16.0.0 or higher
 - Claude Desktop or Claude Code with MCP support
-- Gemini CLI installed (`npm install -g @google/gemini-cli`)
+- OpenCode CLI installed (`npm install -g opencode`)
 
 ## Method 1: NPX (Recommended)
 
@@ -15,9 +15,9 @@ No installation needed - runs directly:
 ```json
 {
   "mcpServers": {
-    "gemini-cli": {
+    "opencode": {
       "command": "npx",
-      "args": ["-y", "gemini-mcp-tool"]
+      "args": ["-y", "opencode-mcp-tool"]
     }
   }
 }
@@ -26,15 +26,15 @@ No installation needed - runs directly:
 ## Method 2: Global Installation
 
 ```bash
-claude mcp add gemini-cli -- npx -y gemini-mcp-tool
+claude mcp add opencode -- npx -y opencode-mcp-tool
 ```
 
 Then configure:
 ```json
 {
   "mcpServers": {
-    "gemini-cli": {
-      "command": "gemini-mcp"
+    "opencode": {
+      "command": "opencode-mcp"
     }
   }
 }
@@ -43,7 +43,7 @@ Then configure:
 ## Method 3: Local Project
 
 ```bash
-npm install gemini-mcp-tool
+npm install opencode-mcp-tool
 ```
 
 See [Getting Started](/getting-started) for full setup instructions.

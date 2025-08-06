@@ -41,7 +41,7 @@ export const fetchChunkTool: UnifiedTool = {
       return `❌ Cache miss: No chunks found for cache key "${cacheKey}". 
 
   Possible reasons:
-  1. The cache key is incorrect, Have you ran ask-gemini with changeMode enabled?
+  1. The cache key is incorrect, Have you ran ask-opencode with changeMode enabled?
   2. The cache has expired (10 minute TTL)
   3. The MCP server was restarted and the file-based cache was cleared
 

@@ -1,32 +1,32 @@
 # First Steps
 
-Once installed, here's how to get started with Gemini MCP Tool.
+Once installed, here's how to get started with OpenCode MCP Tool.
 
 ## Test Connection
 
 ```
-/gemini-cli:ping "Hello from Gemini!"
+/opencode:ping "Hello from OpenCode!"
 ```
 
 ## Basic File Analysis
 
 Analyze a single file:
 ```
-/gemini-cli:analyze @README.md summarize this
+/opencode:analyze @README.md summarize this
 ```
 
 ## Natural Language Usage
 
 Just ask naturally:
-- "Use gemini to explain this codebase"
-- "Ask gemini to analyze the architecture"
-- "Have gemini review this function"
+- "Use opencode to explain this codebase"
+- "Ask opencode to analyze the architecture"
+- "Have opencode review this function"
 
 ## Sandbox Testing
 
 Test code safely:
 ```
-/gemini-cli:sandbox create a Python script that generates fibonacci numbers
+/opencode:sandbox create a Python script that generates fibonacci numbers
 ```
 
 ## Next Steps

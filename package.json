@@ -27,16 +27,16 @@
     "ai",
     "llm"
   ],
-  "author": "jamubc",
+  "author": "frap129",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jamubc/opencode-mcp-tool.git"
+    "url": "git+https://github.com/frap129/opencode-mcp-tool.git"
   },
   "bugs": {
-    "url": "https://github.com/jamubc/opencode-mcp-tool/issues"
+    "url": "https://github.com/frap129/opencode-mcp-tool/issues"
   },
-  "homepage": "https://github.com/jamubc/opencode-mcp-tool#readme",
+  "homepage": "https://github.com/frap129/opencode-mcp-tool#readme",
   "engines": {
     "node": ">=16.0.0"
   },

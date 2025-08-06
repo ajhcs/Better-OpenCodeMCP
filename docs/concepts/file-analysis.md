@@ -1,33 +1,33 @@
 # File Analysis with @ Syntax
 
-One of the most powerful features of Gemini MCP Tool is the ability to analyze files using the `@` syntax.
+One of the most powerful features of OpenCode MCP Tool is the ability to analyze files using the `@` syntax.
 
 ## Basic Usage
 
 ```
-/gemini-cli:analyze @index.js explain this code
+/opencode:analyze @index.js explain this code
 ```
 ```
-ask gemini to analyze the entire codebase and a comment block 
+ask opencode to analyze the entire codebase and a comment block 
 to the top of every script, explaining that script. Use flash.
 ```
 ```
-Ask gemini to explain @index.js by reading the entire codebase first
+Ask opencode to explain @index.js by reading the entire codebase first
 ```
 ```
-Ask gemini to analyze @src/ and provide bug fixes
+Ask opencode to analyze @src/ and provide bug fixes
 ```
 ```
-Ask gemini what the weather is like in new york
+Ask opencode what the weather is like in new york
 ```
 ```
-...then use gemini to review your recent modifications
+...then use opencode to review your recent modifications
 ```
 ## Multiple Files
 
 Analyze multiple files in one request:
 ```
-/gemini-cli:analyze @src/server.js @src/client.js how do these interact?
+/opencode:analyze @src/server.js @src/client.js how do these interact?
 ```
 ```
 analyze @src/server.js @src/client.js and provide bug fixes
@@ -37,15 +37,15 @@ analyze @src/server.js @src/client.js and provide bug fixes
 
 Analyze whole directories:
 ```
-/gemini-cli:analyze @src/**/*.ts summarize the TypeScript architecture
+/opencode:analyze @src/**/*.ts summarize the TypeScript architecture
 ```
 ```
-analyze @main using gemini and determine the top 3 optimizations
+analyze @main using opencode and determine the top 3 optimizations
 ```
 
 ## Why @ Syntax?
 
-- **Familiar**: Both Claude and Gemini natively support it
+- **Familiar**: Both Claude and OpenCode natively support it
 - **Explicit**: Clear which files are being analyzed
 - **Flexible**: Works with single files, multiple files, or patterns
 
@@ -76,15 +76,15 @@ analyze @main using gemini and determine the top 3 optimizations
 
 ### 4. Speak Naturally
 ```
-What does gemini think about that?
+What does opencode think about that?
 ```
 ```
-ask gemini to get a second opinion
+ask opencode to get a second opinion
 ```
 
 ## Token Optimization
 
-Gemini's massive context window allows analyzing entire codebases, saving claude tokens.
+OpenCode's massive context window allows analyzing entire codebases, saving claude tokens.
 
 ## Examples
 

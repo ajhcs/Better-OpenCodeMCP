@@ -32,18 +32,18 @@
 Before installing, ensure you have:
 
 - **[Node.js](https://nodejs.org/)** v16.0.0 or higher
-- **[Google Gemini CLI](https://github.com/google-gemini/gemini-cli)** installed and configured on your system
+- **[OpenCode CLI](https://github.com/fictiverse/opencode)** installed and configured on your system
 - **[Claude Desktop](https://claude.ai/download)** or **[Claude Code](https://www.anthropic.com/claude-code)** with MCP support
 
 
 ## Claude Code (Recommended)
-::: warning 💡 gemini-mcp-tool is tested extensively with claude code
+::: warning 💡 opencode-mcp-tool is tested extensively with claude code
 :::
 Claude Code offers the smoothest experience.
 
 ```bash
 # install for claude code
-claude mcp add gemini-cli -- npx -y gemini-mcp-tool
+claude mcp add opencode -- npx -y opencode-mcp-tool
 
 # Start Claude Code - it's automatically configured!
 claude
@@ -70,9 +70,9 @@ For Claude Desktop users, add this to your configuration file:
 ```json
 {
   "mcpServers": {
-    "gemini-cli": {
+    "opencode": {
       "command": "npx",
-      "args": ["-y", "gemini-mcp-tool"]
+      "args": ["-y", "opencode-mcp-tool"]
     }
   }
 }
@@ -83,7 +83,7 @@ You must restart Claude Desktop ***completely*** for changes to take effect.
 :::
 ## Other MCP Clients
 
-Gemini MCP Tool works with 40+ MCP clients! Here are the common configuration patterns:
+OpenCode MCP Tool works with 40+ MCP clients! Here are the common configuration patterns:
 
 ### STDIO Transport (Most Common)
 ```json
@@ -91,7 +91,7 @@ Gemini MCP Tool works with 40+ MCP clients! Here are the common configuration pa
   "transport": {
     "type": "stdio",
     "command": "npx",
-    "args": ["-y", "gemini-mcp-tool"]
+    "args": ["-y", "opencode-mcp-tool"]
   }
 }
 ```
@@ -105,11 +105,11 @@ Gemini MCP Tool works with 40+ MCP clients! Here are the common configuration pa
 
 ```json
 {
-  "gemini-cli": {
+  "opencode": {
     "command": "npx",
     "args": [
       "-y",
-      "gemini-mcp-tool"
+      "opencode-mcp-tool"
     ],
     "env": {},
     "working_directory": null,
@@ -122,10 +122,10 @@ Gemini MCP Tool works with 40+ MCP clients! Here are the common configuration pa
 </details>
 ### Generic Setup Steps
 
-1. **Install Prerequisites**: Ensure [Gemini CLI](https://github.com/google-gemini/gemini-cli) is installed
+1. **Install Prerequisites**: Ensure [OpenCode CLI](https://github.com/fictiverse/opencode) is installed
 2. **Add Server Config**: Use the STDIO transport pattern above
 3. **Restart Client**: Most clients require restart after config changes
-4. **Test Connection**: Try `/gemini-cli:ping` or natural language commands
+4. **Test Connection**: Try `/opencode:ping` or natural language commands
 
 ## Verify Your Setup
 
@@ -134,17 +134,17 @@ Once configured, test that everything is working:
 ### 1. Basic Connectivity Test
 Type in Claude:
 ```
-/gemini-cli:ping "Hello from Gemini MCP!"
+/opencode:ping "Hello from OpenCode MCP!"
 ```
 
 ### 2. Test File Analysis
 ```
-/gemini-cli:analyze @README.md summarize this file
+/opencode:analyze @README.md summarize this file
 ```
 
 ### 3. Test Sandbox Mode
 ```
-/gemini-cli:sandbox create a simple Python hello world script
+/opencode:plan create a simple Python hello world script
 ```
 
 ## Quick Command Reference
@@ -152,20 +152,20 @@ Type in Claude:
 Once installed, you can use natural language or slash commands:
 
 ### Natural Language Examples
-- "use gemini to explain index.html"
-- "understand the massive project using gemini"
-- "ask gemini to search for latest news"
+- "use opencode to explain index.html"
+- "understand the massive project using opencode"
+- "ask opencode to search for latest news"
 
 ### Slash Commands in Claude Code
-Type `/gemini-cli` and these commands will appear:
-- `/gemini-cli:analyze` - Analyze files or ask questions
-- `/gemini-cli:sandbox` - Safe code execution
-- `/gemini-cli:help` - Show help information
-- `/gemini-cli:ping` - Test connectivity
+Type `/opencode` and these commands will appear:
+- `/opencode:analyze` - Analyze files or ask questions
+- `/opencode:plan` - Structured analysis and planning
+- `/opencode:help` - Show help information
+- `/opencode:ping` - Test connectivity
 
 ## Need a Different Client?
 
-Don't see your MCP client listed? Gemini MCP Tool uses standard MCP protocol and works with any compatible client.
+Don't see your MCP client listed? OpenCode MCP Tool uses standard MCP protocol and works with any compatible client.
 
 ::: tip Find More MCP Clients
 - **Official List**: [modelcontextprotocol.io/clients](https://modelcontextprotocol.io/clients)
@@ -175,10 +175,10 @@ Don't see your MCP client listed? Gemini MCP Tool uses standard MCP protocol and
 
 ## Common Issues
 
-### "Command not found: gemini"
-Make sure you've installed the Gemini CLI:
+### "Command not found: opencode"
+Make sure you've installed the OpenCode CLI:
 ```bash
-npm install -g @google/gemini-cli
+npm install -g opencode
 ```
 
 ### "MCP server not responding"
@@ -186,7 +186,7 @@ npm install -g @google/gemini-cli
 1. Check your configuration file path
 2. Ensure JSON syntax is correct
 3. Restart your MCP client completely
-4. Verify Gemini CLI works: `gemini -help`
+4. Verify OpenCode CLI works: `opencode -help`
 
 
 ### Client-Specific Issues
@@ -202,5 +202,5 @@ Now that you're set up:
 - Join the community for support
 
 ::: info Need Help?
-If you run into issues, [open an issue](https://github.com/jamubc/gemini-mcp-tool/issues) on GitHub.
+If you run into issues, [open an issue](https://github.com/frap129/opencode-mcp-tool/issues) on GitHub.
 :::

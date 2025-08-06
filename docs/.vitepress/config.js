@@ -66,7 +66,7 @@ export default withMermaid(
     ],
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/jamubc/gemini-mcp-tool' }
+      { icon: 'github', link: 'https://github.com/frap129/opencode-mcp-tool' }
     ],
 
     footer: {
