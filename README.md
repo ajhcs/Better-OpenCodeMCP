@@ -32,7 +32,7 @@ Before using this tool, ensure you have:
 ### One-Line Setup
 
 ```bash
-claude mcp add opencode-cli -- npx -y opencode-mcp-tool -- --model google/gemini-2.5-pro
+claude mcp add opencode -- npx -y opencode-mcp-tool -- --model google/gemini-2.5-pro
 ```
 
 ### Verify Installation
@@ -47,7 +47,7 @@ If you already have it configured in Claude Desktop:
 
 1. Add to your Claude Desktop config:
 ```json
-"opencode-cli": {
+"opencode": {
   "command": "npx",
   "args": ["-y", "opencode-mcp-tool", "--", "--model", "google/gemini-2.5-pro"]
 }
@@ -69,7 +69,7 @@ Add this configuration to your Claude Desktop config file:
 ```json
 {
   "mcpServers": {
-    "opencode-cli": {
+    "opencode": {
       "command": "npx",
       "args": ["-y", "opencode-mcp-tool", "--", "--model", "google/gemini-2.5-pro", "--fallback-model", "google/gemini-2.5-flash"]
     }
@@ -84,7 +84,7 @@ If you installed globally, use this configuration instead:
 ```json
 {
   "mcpServers": {
-    "opencode-cli": {
+    "opencode": {
       "command": "opencode-mcp",
       "args": ["--model", "google/gemini-2.5-pro", "--fallback-model", "google/gemini-2.5-flash"]
     }
@@ -133,25 +133,33 @@ The plan mode allows you to safely test code changes, run scripts, or execute po
 
 These tools are designed to be used by the AI assistant.
 
-- **`ask-opencode`**: Asks OpenCode for analysis using multiple AI models. Can be used for general questions or complex analysis of files.
+- **`ask-opencode`**: Execute OpenCode with model selection and mode control. Uses plan mode by default for structured analysis.
   - **`prompt`** (required): The analysis request. Use the `@` syntax to include file or directory references (e.g., `@src/main.js explain this code`) or ask general questions (e.g., `Please use a web search to find the latest news stories`).
-  - **`model`** (optional): The model to use. Defaults to `google/gemini-2.5-pro`.
-  - **`planMode`** (optional): Set to `true` to run in plan mode for structured analysis.
-- **`timeout-test`**: Tests timeout handling for long-running operations.
+  - **`model`** (optional): The model to use. If not specified, uses the primary model configured at server startup.
+  - **`mode`** (optional): Execution mode - 'plan' for structured analysis (default), 'build' for immediate execution, or custom mode string.
+- **`brainstorm`**: Generate novel ideas with dynamic context gathering using creative frameworks (SCAMPER, Design Thinking, etc.), domain context integration, idea clustering, feasibility analysis, and iterative refinement.
+  - **`prompt`** (required): Primary brainstorming challenge or question to explore.
+  - **`methodology`** (optional): Brainstorming framework - 'divergent', 'convergent', 'scamper', 'design-thinking', 'lateral', or 'auto' (default).
+  - **`domain`** (optional): Domain context (e.g., 'software', 'business', 'creative', 'research').
+  - **`ideaCount`** (optional): Target number of ideas to generate (default: 12).
+  - **`includeAnalysis`** (optional): Include feasibility and impact analysis (default: true).
+- **`timeout-test`**: Test timeout prevention by running for a specified duration.
   - **`duration`** (required): Duration in milliseconds for the test.
-  - **`model`** (optional): The model to use for testing.
-- **`Ping`**: A simple test tool that echoes back a message.
+- **`ping`**: Echo test tool that returns a message.
+  - **`prompt`** (optional): Message to echo back.
 - **`Help`**: Shows the OpenCode CLI help text.
 
 ### Slash Commands (for the User)
 
 You can use these commands directly in Claude Code's interface (compatibility with other clients has not been tested).
 
-- **/plan**: Uses plan mode for structured analysis and safer operations.
+- **/plan**: Execute OpenCode in plan mode for structured analysis and safer operations.
   - **`prompt`** (required): Analysis request (e.g., `/plan prompt:Create and run a Python script that processes CSV data` or `/plan prompt:@script.py Analyze this script safely`).
+- **/build**: Execute OpenCode in immediate execution mode for direct implementation.
+  - **`prompt`** (required): Implementation request for immediate code execution.
 - **/help**: Displays the OpenCode CLI help information.
 - **/ping**: Tests the connection to the server.
-  - **`message`** (optional): A message to echo back.
+  - **`prompt`** (optional): A message to echo back.
 
 ## Contributing
 
