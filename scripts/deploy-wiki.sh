@@ -6,7 +6,7 @@ set -e
 echo "🚀 Deploying Wiki to GitHub..."
 
 # Check if gh is installed
-if ! command -v gh &> /dev/null; then
+if ! command -v gh &>/dev/null; then
     echo "❌ GitHub CLI (gh) is required but not installed."
     echo "Install with: brew install gh"
     exit 1
@@ -21,18 +21,17 @@ fi
 # Function to convert filename to wiki page name
 convert_filename() {
     local filepath="$1"
-    # Remove docs/ prefix and .md suffix
-    local name=$(echo "$filepath" | sed 's|^docs/||' | sed 's|\.md$||')
-    
+    name=$(echo "$filepath" | sed 's|^\.\./docs/||')
+
     # Handle special cases
     case "$name" in
-        "index") echo "Home" ;;
-        "getting-started") echo "Getting-Started" ;;
-        "api") echo "API" ;;
-        *) 
-            # Convert directory/file to Directory-File format
-            echo "$name" | sed 's|/|-|g' | sed 's/\b\w/\u&/g'
-            ;;
+    "index.md") echo "Home.md" ;;
+    "getting-started.md") echo "Getting-Started.md" ;;
+    "api.md") echo "API.md" ;;
+    *)
+        # Convert directory/file to Directory-File format
+        echo "$name" | sed 's|/|-|g' | sed 's/\b\w/\u&/g'
+        ;;
     esac
 }
 
@@ -46,7 +45,7 @@ git clone https://github.com/frap129/opencode-mcp-tool.wiki.git .wiki-temp 2>/de
         --method POST \
         -f title="Home" \
         -f body="Initializing wiki..." || true
-    
+
     # Try cloning again
     git clone https://github.com/frap129/opencode-mcp-tool.wiki.git .wiki-temp
 }
@@ -57,16 +56,14 @@ echo "📄 Creating wiki pages from docs/ directory..."
 
 # Discover and copy all markdown files
 find ../docs -name "*.md" -type f | while read -r filepath; do
-    wiki_name=$(convert_filename "$filepath")
-    wiki_file="${wiki_name}.md"
-    
+    wiki_file=$(convert_filename "$filepath")
     echo "  Converting $filepath → $wiki_file"
     cp "$filepath" "$wiki_file"
 done
 
 # Generate dynamic sidebar based on discovered files
 echo "📋 Generating navigation sidebar..."
-cat > _Sidebar.md << 'EOF'
+cat >_Sidebar.md <<'EOF'
 ## 🏠 Navigation
 
 **Getting Started**
@@ -100,7 +97,7 @@ cat > _Sidebar.md << 'EOF'
 EOF
 
 # Create footer
-cat > _Footer.md << 'EOF'
+cat >_Footer.md <<'EOF'
 ---
 📄 [MIT License](https://github.com/frap129/opencode-mcp-tool/blob/main/LICENSE) | 
 🔧 [Contribute](https://github.com/frap129/opencode-mcp-tool/blob/main/CONTRIBUTING.md) | 
