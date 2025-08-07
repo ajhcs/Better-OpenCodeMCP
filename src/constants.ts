@@ -24,14 +24,6 @@ export const STATUS_MESSAGES = {
   PROCESSING_COMPLETE: "✅ Analysis completed successfully",
 } as const;
 
-// Models - Note: These are examples, actual models are provided via CLI args
-export const MODELS = {
-  // Common model examples - server will use CLI-provided models
-  GOOGLE_PRO: "google/gemini-2.5-pro",
-  GOOGLE_FLASH: "google/gemini-2.5-flash",
-  ANTHROPIC_SONNET: "anthropic/claude-3-5-sonnet-20241022",
-} as const;
-
 // MCP Protocol Constants
 export const PROTOCOL = {
   // Message roles
