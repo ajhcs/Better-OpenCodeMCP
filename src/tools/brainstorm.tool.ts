@@ -165,7 +165,7 @@ export const brainstormTool: UnifiedTool = {
     // Report progress to user
     onProgress?.(`Generating ${ideaCount} ideas via ${methodology} methodology...`);
 
-    // Execute with plan mode (hardcoded for brainstorming)
+    // Execute with plan agent (hardcoded for brainstorming)
     return await executeOpenCodeCLI(enhancedPrompt, "plan", model as string | undefined, onProgress);
   }
 };

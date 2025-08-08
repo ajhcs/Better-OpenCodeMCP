@@ -9,7 +9,7 @@ import { getServerConfig } from '../index.js';
 
 export async function executeOpenCodeCLI(
   prompt: string,
-  mode: string,
+  agent: string,
   model?: string,
   onProgress?: (newOutput: string) => void
 ): Promise<string> {
@@ -21,8 +21,8 @@ export async function executeOpenCodeCLI(
   const useModel = model || serverConfig.primaryModel;
   args.push(CLI.FLAGS.MODEL, useModel);
 
-  // Add mode (now required)
-  args.push(CLI.FLAGS.MODE, mode);
+  // Add agent (now required)
+  args.push(CLI.FLAGS.AGENT, agent);
 
   // Add prompt as positional argument (no -p flag in opencode)
   args.push(prompt);
@@ -37,7 +37,7 @@ export async function executeOpenCodeCLI(
 
       const fallbackArgs: string[] = [CLI.SUBCOMMANDS.RUN];
       fallbackArgs.push(CLI.FLAGS.MODEL, serverConfig.fallbackModel);
-      fallbackArgs.push(CLI.FLAGS.MODE, mode);
+      fallbackArgs.push(CLI.FLAGS.AGENT, agent);
 
       fallbackArgs.push(prompt);
 

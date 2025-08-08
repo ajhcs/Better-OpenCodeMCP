@@ -65,7 +65,7 @@ export const CLI = {
   // Command flags
   FLAGS: {
     MODEL: "-m",
-    MODE: "--mode",
+    AGENT: "--agent",
     HELP: "--help",
   },
   // Mode values
@@ -84,7 +84,7 @@ export const CLI = {
 export interface ToolArguments {
   prompt?: string;
   model?: string;
-  mode?: string; // Generic mode parameter (plan, build, or custom)
+  agent?: string; // Generic agent parameter (plan, build, or custom)
   message?: string; // For Ping tool -- Un-used.
 
   // --> new tool

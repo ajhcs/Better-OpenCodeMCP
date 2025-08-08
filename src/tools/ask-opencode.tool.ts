@@ -9,26 +9,26 @@ import {
 const askOpenCodeArgsSchema = z.object({
   prompt: z.string().min(1).describe("Analysis request. Use @ syntax to include files (e.g., '@largefile.js explain what this does') or ask general questions"),
   model: z.string().optional().describe("Optional model to use (e.g., 'google/gemini-2.5-flash'). If not specified, uses the primary model configured at server startup."),
-  mode: z.string().default("plan").describe("Execution mode: 'plan' for structured analysis, 'build' for immediate execution, or custom mode string"),
+  agent: z.string().default("plan").describe("Execution agent: 'plan' for structured analysis, 'build' for immediate execution, or custom agent string"),
 });
 
 export const askOpenCodeTool: UnifiedTool = {
   name: "ask-opencode",
-  description: "Execute OpenCode with model selection [-m] and mode selection [--mode]",
+  description: "Execute OpenCode with model selection [-m] and agent selection [--agent]",
   zodSchema: askOpenCodeArgsSchema,
   prompt: {
     description: "Execute 'opencode run <prompt>' to get OpenCode AI's response. Supports plan mode (default) and other execution modes.",
   },
   category: 'opencode',
   execute: async (args, onProgress) => {
-    const { prompt, model, mode } = args;
+    const { prompt, model, agent } = args;
     if (!prompt?.trim()) {
       throw new Error(ERROR_MESSAGES.NO_PROMPT_PROVIDED);
     }
 
     const result = await executeOpenCodeCLI(
       prompt as string,
-      mode as string,
+      agent as string,
       model as string | undefined,
       onProgress
     );

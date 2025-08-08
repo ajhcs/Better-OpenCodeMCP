@@ -15,7 +15,7 @@ const slashCommandArgsSchema = z.object({
 // Shared execution logic
 async function executeSlashCommand(
   args: any,
-  mode: string,
+  agent: string,
   onProgress?: (newOutput: string) => void
 ): Promise<string> {
   const { prompt, model } = args;
@@ -26,7 +26,7 @@ async function executeSlashCommand(
 
   const result = await executeOpenCodeCLI(
     prompt as string,
-    mode,
+    agent,
     model as string | undefined,
     onProgress
   );
@@ -39,7 +39,7 @@ export const opencodePlanTool: UnifiedTool = {
   description: "Execute OpenCode in plan mode for structured analysis and planning",
   zodSchema: slashCommandArgsSchema,
   prompt: {
-    description: "Execute 'opencode run <prompt> --mode plan' for structured planning and analysis.",
+    description: "Execute 'opencode run <prompt> --agent plan' for structured planning and analysis.",
   },
   category: 'opencode',
   execute: async (args, onProgress) => {
