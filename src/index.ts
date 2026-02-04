@@ -19,6 +19,7 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { Logger } from "./utils/logger.js";
 import { PROTOCOL, ToolArguments } from "./constants.js";
+import { setServerConfig } from "./config.js";
 
 import {
   getToolDefinitions,
@@ -27,14 +28,6 @@ import {
   toolExists,
   getPromptMessage
 } from "./tools/index.js";
-
-// Global configuration for model settings
-export interface ServerConfig {
-  primaryModel: string;
-  fallbackModel?: string;
-}
-
-let serverConfig: ServerConfig;
 
 const server = new Server(
   {
@@ -50,7 +43,24 @@ const server = new Server(
 },
 );
 
-let isProcessing = false; let currentOperationName = ""; let latestOutput = "";
+// Per-request progress context to support concurrent tool calls
+interface ProgressContext {
+  operationName: string;
+  latestOutput: string;
+  interval: NodeJS.Timeout | null;
+  progressToken?: string | number;
+  messageIndex: number;
+  progress: number;
+}
+
+// Map of request ID to progress context - enables concurrent requests
+const progressContexts = new Map<string, ProgressContext>();
+
+// Generate unique request ID
+let requestCounter = 0;
+function generateRequestId(): string {
+  return `req-${Date.now()}-${++requestCounter}`;
+}
 
 async function sendNotification(method: string, params: any) {
   try {
@@ -95,10 +105,20 @@ async function sendProgressNotification(
 function startProgressUpdates(
   operationName: string,
   progressToken?: string | number
-) {
-  isProcessing = true;
-  currentOperationName = operationName;
-  latestOutput = ""; // Reset latest output
+): string {
+  const requestId = generateRequestId();
+
+  // Create isolated context for this request
+  const context: ProgressContext = {
+    operationName,
+    latestOutput: "",
+    interval: null,
+    progressToken,
+    messageIndex: 0,
+    progress: 0,
+  };
+
+  progressContexts.set(requestId, context);
 
   const progressMessages = [
     `🧠 ${operationName} - OpenCode is analyzing your request...`,
@@ -107,9 +127,6 @@ function startProgressUpdates(
     `⏱️ ${operationName} - Large analysis in progress (this is normal for big requests)...`,
     `🔍 ${operationName} - Still working... OpenCode takes time for quality results...`,
   ];
-
-  let messageIndex = 0;
-  let progress = 0;
 
   // Send immediate acknowledgment if progress requested
   if (progressToken) {
@@ -123,49 +140,62 @@ function startProgressUpdates(
 
   // Keep client alive with periodic updates
   const progressInterval = setInterval(async () => {
-    if (isProcessing && progressToken) {
-      // Simply increment progress value
-      progress += 1;
+    const ctx = progressContexts.get(requestId);
+    if (ctx && ctx.progressToken) {
+      ctx.progress += 1;
 
       // Include latest output if available
-      const baseMessage = progressMessages[messageIndex % progressMessages.length];
-      const outputPreview = latestOutput.slice(-150).trim(); // Last 150 chars
+      const baseMessage = progressMessages[ctx.messageIndex % progressMessages.length];
+      const outputPreview = ctx.latestOutput.slice(-150).trim(); // Last 150 chars
       const message = outputPreview
         ? `${baseMessage}\n📝 Output: ...${outputPreview}`
         : baseMessage;
 
       await sendProgressNotification(
-        progressToken,
-        progress,
+        ctx.progressToken,
+        ctx.progress,
         undefined, // No total - indeterminate progress
         message
       );
-      messageIndex++;
-    } else if (!isProcessing) {
+      ctx.messageIndex++;
+    } else if (!ctx) {
+      // Context was removed, clean up interval
       clearInterval(progressInterval);
     }
   }, PROTOCOL.KEEPALIVE_INTERVAL); // Every 25 seconds
 
-  return { interval: progressInterval, progressToken };
+  context.interval = progressInterval;
+  return requestId;
 }
 
-function stopProgressUpdates(
-  progressData: { interval: NodeJS.Timeout; progressToken?: string | number },
-  success: boolean = true
-) {
-  const operationName = currentOperationName; // Store before clearing
-  isProcessing = false;
-  currentOperationName = "";
-  clearInterval(progressData.interval);
+function stopProgressUpdates(requestId: string, success: boolean = true) {
+  const context = progressContexts.get(requestId);
+  if (!context) return;
+
+  // Clear interval first
+  if (context.interval) {
+    clearInterval(context.interval);
+  }
 
   // Send final progress notification if client requested progress
-  if (progressData.progressToken) {
+  if (context.progressToken) {
     sendProgressNotification(
-      progressData.progressToken,
+      context.progressToken,
       100,
       100,
-      success ? `✅ ${operationName} completed successfully` : `❌ ${operationName} failed`
+      success ? `✅ ${context.operationName} completed successfully` : `❌ ${context.operationName} failed`
     );
+  }
+
+  // Remove context from map
+  progressContexts.delete(requestId);
+}
+
+// Helper to update output for a specific request
+function updateRequestOutput(requestId: string, newOutput: string) {
+  const context = progressContexts.get(requestId);
+  if (context) {
+    context.latestOutput = newOutput;
   }
 }
 
@@ -174,7 +204,7 @@ server.setRequestHandler(ListToolsRequestSchema, async (request: ListToolsReques
   return { tools: getToolDefinitions() as unknown as Tool[] };
 });
 
-// tools/get
+// tools/call
 server.setRequestHandler(CallToolRequestSchema, async (request: CallToolRequest): Promise<CallToolResult> => {
   const toolName: string = request.params.name;
 
@@ -182,8 +212,8 @@ server.setRequestHandler(CallToolRequestSchema, async (request: CallToolRequest)
     // Check if client requested progress updates
     const progressToken = (request.params as any)._meta?.progressToken;
 
-    // Start progress updates if client requested them
-    const progressData = startProgressUpdates(toolName, progressToken);
+    // Start progress updates - returns unique request ID for this call
+    const requestId = startProgressUpdates(toolName, progressToken);
 
     try {
       // Get prompt and other parameters from arguments with proper typing
@@ -192,12 +222,13 @@ server.setRequestHandler(CallToolRequestSchema, async (request: CallToolRequest)
       Logger.toolInvocation(toolName, request.params.arguments);
 
       // Execute the tool using the unified registry with progress callback
+      // Each request has its own isolated output state
       const result = await executeTool(toolName, args, (newOutput) => {
-        latestOutput = newOutput;
+        updateRequestOutput(requestId, newOutput);
       });
 
       // Stop progress updates
-      stopProgressUpdates(progressData, true);
+      stopProgressUpdates(requestId, true);
 
       return {
         content: [
@@ -210,7 +241,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request: CallToolRequest)
       };
     } catch (error) {
       // Stop progress updates on error
-      stopProgressUpdates(progressData, false);
+      stopProgressUpdates(requestId, false);
 
       Logger.error(`Error in tool '${toolName}':`, error);
 
@@ -274,24 +305,20 @@ async function main() {
   const options = program.opts();
 
   // Store server configuration globally
-  serverConfig = {
+  const config = {
     primaryModel: options.model,
     fallbackModel: options.fallbackModel
   };
+  setServerConfig(config);
 
-  Logger.debug("init opencode-mcp-tool with model:", serverConfig.primaryModel);
-  if (serverConfig.fallbackModel) {
-    Logger.debug("fallback model:", serverConfig.fallbackModel);
+  Logger.debug("init opencode-mcp-tool with model:", config.primaryModel);
+  if (config.fallbackModel) {
+    Logger.debug("fallback model:", config.fallbackModel);
   }
 
   const transport = new StdioServerTransport();
   await server.connect(transport);
   Logger.debug("opencode-mcp-tool listening on stdio");
-}
-
-// Export server config for use in tools
-export function getServerConfig(): ServerConfig {
-  return serverConfig;
 }
 
 main().catch((error) => {

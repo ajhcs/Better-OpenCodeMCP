@@ -5,7 +5,7 @@ import {
   STATUS_MESSAGES,
   CLI
 } from '../constants.js';
-import { getServerConfig } from '../index.js';
+import { getServerConfig } from '../config.js';
 
 export async function executeOpenCodeCLI(
   prompt: string,

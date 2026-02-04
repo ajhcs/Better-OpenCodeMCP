@@ -1,7 +1,24 @@
 import { spawn } from "child_process";
 import { Logger } from "./logger.js";
+import { openCodeProcessPool } from "./processPool.js";
 
+/**
+ * Execute a command with process pool limiting
+ * Ensures no more than maxConcurrent processes run simultaneously
+ */
 export async function executeCommand(
+  command: string,
+  args: string[],
+  onProgress?: (newOutput: string) => void
+): Promise<string> {
+  // Use process pool to limit concurrent executions
+  return openCodeProcessPool.execute(() => executeCommandInternal(command, args, onProgress));
+}
+
+/**
+ * Internal command execution (called by process pool)
+ */
+function executeCommandInternal(
   command: string,
   args: string[],
   onProgress?: (newOutput: string) => void
