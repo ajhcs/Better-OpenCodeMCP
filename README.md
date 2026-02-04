@@ -1,19 +1,25 @@
-
-# OpenCode MCP Tool
+# Better OpenCode MCP
 
 <div align="center">
 
-[![GitHub Release](https://img.shields.io/github/v/release/frap129/opencode-mcp-tool?logo=github&label=GitHub)](https://github.com/frap129/opencode-mcp-tool/releases)
-[![npm version](https://img.shields.io/npm/v/opencode-mcp-tool)](https://www.npmjs.com/package/opencode-mcp-tool)
-[![npm downloads](https://img.shields.io/npm/dt/opencode-mcp-tool)](https://www.npmjs.com/package/opencode-mcp-tool)
+[![GitHub Release](https://img.shields.io/github/v/release/ajhcs/Better-OpenCodeMCP?logo=github&label=GitHub)](https://github.com/ajhcs/Better-OpenCodeMCP/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![Open Source](https://img.shields.io/badge/Open%20Source-❤️-red.svg)](https://github.com/frap129/opencode-mcp-tool)
+[![Open Source](https://img.shields.io/badge/Open%20Source-red.svg)](https://github.com/ajhcs/Better-OpenCodeMCP)
+[![Tests](https://img.shields.io/badge/tests-10%20passing-brightgreen.svg)](https://github.com/ajhcs/Better-OpenCodeMCP)
 
 </div>
 
-> 📚 **Documentation Available in docs/ folder** - Examples, FAQ, Troubleshooting, Best Practices
+> Actively maintained fork of [opencode-mcp-tool](https://github.com/frap129/opencode-mcp-tool) with concurrency fixes and improvements.
 
-This is a Model Context Protocol (MCP) server that allows AI assistants to interact with the [OpenCode CLI](https://github.com/fictiverse/opencode). It enables AI assistants to leverage multiple AI models through a unified interface, with features like plan mode for structured thinking and extensive model selection.
+> Documentation available in the docs/ folder - Examples, FAQ, Troubleshooting, Best Practices
+
+A Model Context Protocol (MCP) server that allows AI assistants to interact with the [OpenCode CLI](https://github.com/fictiverse/opencode). It enables AI assistants to leverage multiple AI models through a unified interface, with features like plan mode for structured thinking and extensive model selection.
+
+## What's Different in This Fork
+
+- **Fixed concurrent execution** - Original had race conditions when multiple tool calls ran simultaneously
+- **Process pooling** - Limits concurrent child processes to prevent resource exhaustion
+- **Test suite** - 10 tests covering core functionality and concurrency
 
 - Ask questions through multiple AI models via Claude or other MCP clients
 - Use plan mode for structured analysis and safer operations
@@ -32,7 +38,7 @@ Before using this tool, ensure you have:
 ### One-Line Setup
 
 ```bash
-claude mcp add opencode -- npx -y opencode-mcp-tool -- --model google/gemini-2.5-pro
+claude mcp add opencode -- npx -y github:ajhcs/Better-OpenCodeMCP -- --model google/gemini-2.5-pro
 ```
 
 ### Verify Installation
@@ -49,7 +55,7 @@ If you already have it configured in Claude Desktop:
 ```json
 "opencode": {
   "command": "npx",
-  "args": ["-y", "opencode-mcp-tool", "--", "--model", "google/gemini-2.5-pro"]
+  "args": ["-y", "github:ajhcs/Better-OpenCodeMCP", "--", "--model", "google/gemini-2.5-pro"]
 }
 ```
 
@@ -71,7 +77,7 @@ Add this configuration to your Claude Desktop config file:
   "mcpServers": {
     "opencode": {
       "command": "npx",
-      "args": ["-y", "opencode-mcp-tool", "--", "--model", "google/gemini-2.5-pro", "--fallback-model", "google/gemini-2.5-flash"]
+      "args": ["-y", "github:ajhcs/Better-OpenCodeMCP", "--", "--model", "google/gemini-2.5-pro", "--fallback-model", "google/gemini-2.5-flash"]
     }
   }
 }
@@ -163,10 +169,14 @@ You can use these commands directly in Claude Code's interface (compatibility wi
 
 ## Contributing
 
-Contributions are welcome! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details on how to submit pull requests, report issues, and contribute to the project.
+Contributions are welcome! Please open an issue or submit a pull request at [github.com/ajhcs/Better-OpenCodeMCP](https://github.com/ajhcs/Better-OpenCodeMCP).
 
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-**Disclaimer:** This is an unofficial, third-party tool and is not affiliated with, endorsed, or sponsored by Google.
+## Acknowledgments
+
+Based on [opencode-mcp-tool](https://github.com/frap129/opencode-mcp-tool) by frap129.
+
+**Disclaimer:** This is an unofficial, third-party tool and is not affiliated with, endorsed, or sponsored by Google or Anthropic.
