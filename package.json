@@ -1,6 +1,6 @@
 {
   "name": "opencode-mcp-tool",
-  "version": "1.1.4",
+  "version": "1.2.0",
   "description": "MCP server for OpenCode CLI integration",
   "type": "module",
   "main": "dist/index.js",
@@ -28,12 +28,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/frap129/opencode-mcp-tool.git"
+    "url": "git+https://github.com/ajhcs/Better-OpenCodeMCP.git"
   },
   "bugs": {
-    "url": "https://github.com/frap129/opencode-mcp-tool/issues"
+    "url": "https://github.com/ajhcs/Better-OpenCodeMCP/issues"
   },
-  "homepage": "https://github.com/frap129/opencode-mcp-tool#readme",
+  "homepage": "https://github.com/ajhcs/Better-OpenCodeMCP#readme",
   "engines": {
     "node": ">=16.0.0"
   },

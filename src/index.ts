@@ -32,7 +32,7 @@ import {
 const server = new Server(
   {
     name: "opencode-mcp",
-    version: "1.1.4",
+    version: "1.2.0",
   }, {
   capabilities: {
     tools: {},
@@ -297,7 +297,7 @@ async function main() {
   program
     .name("opencode-mcp")
     .description("MCP server for OpenCode CLI integration")
-    .version("1.1.4")
+    .version("1.2.0")
     .requiredOption("-m, --model <model>", "Primary model to use (e.g., google/gemini-2.5-pro)")
     .option("-f, --fallback-model <model>", "Fallback model for quota/error situations")
     .parse();
