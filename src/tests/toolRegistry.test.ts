@@ -20,12 +20,21 @@ describe('Tool Registry', () => {
     expect(toolExists('ping')).toBe(true);
   });
 
-  it('should have ask-opencode tool available', () => {
-    expect(toolExists('ask-opencode')).toBe(true);
+  it('should have opencode async tools available', () => {
+    expect(toolExists('opencode')).toBe(true);
+    expect(toolExists('opencode_sessions')).toBe(true);
+    expect(toolExists('opencode_respond')).toBe(true);
   });
 
   it('should return false for non-existent tools', () => {
     expect(toolExists('non-existent-tool')).toBe(false);
+  });
+
+  it('should return false for removed deprecated tools', () => {
+    expect(toolExists('ask-opencode')).toBe(false);
+    expect(toolExists('brainstorm')).toBe(false);
+    expect(toolExists('opencode_plan')).toBe(false);
+    expect(toolExists('opencode_build')).toBe(false);
   });
 
   it('should execute ping tool correctly', async () => {

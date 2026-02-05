@@ -80,20 +80,12 @@ export const CLI = {
 } as const;
 
 
-// (merged PromptArguments and ToolArguments)
+// Tool arguments interface
 export interface ToolArguments {
   prompt?: string;
   model?: string;
   agent?: string; // Generic agent parameter (plan, build, or custom)
-  message?: string; // For Ping tool -- Un-used.
-
-  // --> new tool
-  methodology?: string; // Brainstorming framework to use
-  domain?: string; // Domain context for specialized brainstorming
-  constraints?: string; // Known limitations or requirements
-  existingContext?: string; // Background information to build upon
-  ideaCount?: number; // Target number of ideas to generate
-  includeAnalysis?: boolean; // Include feasibility and impact analysis
+  message?: string; // For Ping tool
 
   [key: string]: string | boolean | number | undefined; // Allow additional properties
 }

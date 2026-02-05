@@ -1,19 +1,18 @@
 // Tool Registry Index - Registers all tools
 import { toolRegistry } from './registry.js';
-import { askOpenCodeTool } from './ask-opencode.tool.js';
 import { pingTool, helpTool } from './simple-tools.js';
-import { brainstormTool } from './brainstorm.tool.js';
-import { timeoutTestTool } from './timeout-test.tool.js';
-import { opencodePlanTool, opencodeBuildTool } from './slash-commands.tool.js';
+import { opencodeTool } from './opencode.tool.js';
+import { opencodeSessionsTool } from './opencode-sessions.tool.js';
+import { opencodeRespondTool } from './opencode-respond.tool.js';
 
 toolRegistry.push(
-  askOpenCodeTool,
+  // Async OpenCode tools
+  opencodeTool,
+  opencodeSessionsTool,
+  opencodeRespondTool,
+  // Simple utility tools
   pingTool,
-  helpTool,
-  brainstormTool,
-  timeoutTestTool,
-  opencodePlanTool,
-  opencodeBuildTool
+  helpTool
 );
 
 export * from './registry.js';
