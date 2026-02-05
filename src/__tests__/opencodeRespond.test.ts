@@ -7,7 +7,7 @@ import {
   getActiveRespondProcessCount,
   OpenCodeRespondResult,
 } from "../tools/opencode-respond.tool.js";
-import { setTaskManager, getTaskManager } from "../tools/opencode.tool.js";
+import { setTaskManager, getTaskManager } from "../tasks/sharedTaskManager.js";
 import { TaskManager, TaskStatus } from "../tasks/taskManager.js";
 
 // Mock the Logger to prevent console output during tests

@@ -4,7 +4,8 @@
  * @module sharedTaskManager
  */
 
-import { TaskManager } from "./taskManager.js";
+import { TaskManager, TaskStatusChangeCallback } from "./taskManager.js";
+import { Logger } from "../utils/logger.js";
 
 let sharedTaskManager: TaskManager | null = null;
 
@@ -15,7 +16,10 @@ let sharedTaskManager: TaskManager | null = null;
  */
 export function getTaskManager(): TaskManager {
   if (!sharedTaskManager) {
-    sharedTaskManager = new TaskManager();
+    // Create with default status change callback for logging
+    sharedTaskManager = new TaskManager((taskId, status, statusMessage) => {
+      Logger.debug(`Task ${taskId} status changed to: ${status}${statusMessage ? ` - ${statusMessage}` : ""}`);
+    });
   }
   return sharedTaskManager;
 }
@@ -23,9 +27,9 @@ export function getTaskManager(): TaskManager {
 /**
  * Sets a custom TaskManager instance (useful for testing).
  *
- * @param manager - The TaskManager instance to use
+ * @param manager - The TaskManager instance to use, or null to reset
  */
-export function setTaskManager(manager: TaskManager): void {
+export function setTaskManager(manager: TaskManager | null): void {
   sharedTaskManager = manager;
 }
 

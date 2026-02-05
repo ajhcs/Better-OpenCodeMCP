@@ -7,7 +7,7 @@
 import { z } from "zod";
 import { spawn, ChildProcess } from "node:child_process";
 import { UnifiedTool } from "./registry.js";
-import { getTaskManager } from "./opencode.tool.js";
+import { getTaskManager } from "../tasks/sharedTaskManager.js";
 import { parseOpenCodeEvent, OpenCodeEvent } from "../utils/jsonEventParser.js";
 import { Logger } from "../utils/logger.js";
 import { CLI } from "../constants.js";

@@ -7,7 +7,7 @@
 import { z } from "zod";
 import { spawn, ChildProcess } from "node:child_process";
 import { UnifiedTool } from "./registry.js";
-import { TaskManager } from "../tasks/taskManager.js";
+import { getTaskManager } from "../tasks/sharedTaskManager.js";
 import { parseOpenCodeEvent, OpenCodeEvent } from "../utils/jsonEventParser.js";
 import { getServerConfig } from "../config.js";
 import { Logger } from "../utils/logger.js";
@@ -56,32 +56,6 @@ export interface OpenCodeToolResult {
   taskId: string;
   sessionId: string;
   status: "working";
-}
-
-// ============================================================================
-// Singleton TaskManager
-// ============================================================================
-
-let taskManagerInstance: TaskManager | null = null;
-
-/**
- * Gets the singleton TaskManager instance.
- * Creates it if it doesn't exist.
- */
-export function getTaskManager(): TaskManager {
-  if (!taskManagerInstance) {
-    taskManagerInstance = new TaskManager((taskId, status, statusMessage) => {
-      Logger.debug(`Task ${taskId} status changed to: ${status}${statusMessage ? ` - ${statusMessage}` : ""}`);
-    });
-  }
-  return taskManagerInstance;
-}
-
-/**
- * Sets a custom TaskManager instance (primarily for testing).
- */
-export function setTaskManager(manager: TaskManager | null): void {
-  taskManagerInstance = manager;
 }
 
 // ============================================================================

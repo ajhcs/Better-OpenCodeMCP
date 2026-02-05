@@ -3,12 +3,11 @@ import * as child_process from "node:child_process";
 import { EventEmitter } from "node:events";
 import {
   opencodeTool,
-  getTaskManager,
-  setTaskManager,
   cleanupActiveProcesses,
   getActiveProcessCount,
   OpenCodeToolResult,
 } from "../tools/opencode.tool.js";
+import { getTaskManager, setTaskManager } from "../tasks/sharedTaskManager.js";
 import { TaskManager } from "../tasks/taskManager.js";
 
 // Mock the Logger to prevent console output during tests
