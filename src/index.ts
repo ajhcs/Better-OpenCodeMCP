@@ -20,6 +20,8 @@ import {
 import { Logger } from "./utils/logger.js";
 import { PROTOCOL, ToolArguments } from "./constants.js";
 import { setServerConfig } from "./config.js";
+import { loadConfig, autoDetectModel, isInteractive, getConfigPath } from "./config/index.js";
+import { runSetupWizard } from "./commands/setup.js";
 
 import {
   getToolDefinitions,
@@ -32,7 +34,7 @@ import {
 const server = new Server(
   {
     name: "opencode-mcp",
-    version: "1.2.0",
+    version: "1.4.0",
   }, {
   capabilities: {
     tools: {},
@@ -289,6 +291,66 @@ server.setRequestHandler(GetPromptRequestSchema, async (request: GetPromptReques
   };
 });
 
+/**
+ * Resolve the model using the resolution chain:
+ * 1. CLI flag (--model)
+ * 2. Config file (~/.config/opencode-mcp/config.json)
+ * 3. Auto-detect from OpenCode's model.json
+ * 4. Interactive wizard (if TTY)
+ * 5. Error with helpful message
+ */
+type AgentMode = 'build' | 'plan' | 'explore';
+
+async function resolveModel(cliModel?: string, cliFallback?: string): Promise<{ model: string; fallback?: string; agent?: AgentMode }> {
+  // 1. CLI flag takes priority
+  if (cliModel) {
+    Logger.debug(`Using model from CLI: ${cliModel}`);
+    return { model: cliModel, fallback: cliFallback };
+  }
+
+  // 2. Check config file
+  const fileConfig = loadConfig();
+  if (fileConfig?.model) {
+    Logger.debug(`Using model from config file: ${fileConfig.model}`);
+    return {
+      model: fileConfig.model,
+      fallback: cliFallback || fileConfig.fallbackModel,
+      agent: fileConfig.defaults?.agent,
+    };
+  }
+
+  // 3. Auto-detect from OpenCode state
+  const autoModel = autoDetectModel();
+  if (autoModel) {
+    Logger.debug(`Using auto-detected model: ${autoModel}`);
+    return { model: autoModel, fallback: cliFallback };
+  }
+
+  // 4. Interactive wizard (if TTY)
+  if (isInteractive()) {
+    Logger.debug('No model found, launching setup wizard...');
+    const wizardConfig = await runSetupWizard();
+    return {
+      model: wizardConfig.model!,
+      fallback: wizardConfig.fallbackModel,
+      agent: wizardConfig.defaults?.agent,
+    };
+  }
+
+  // 5. Error - no model and not interactive
+  const configPath = getConfigPath();
+  console.error(`
+❌ No model configured. Run setup first:
+   opencode-mcp --setup
+
+Or specify directly:
+   opencode-mcp --model google/gemini-2.5-pro
+
+Config file location: ${configPath}
+`);
+  process.exit(1);
+}
+
 // Setup CLI arguments and start the server
 async function main() {
   const program = new Command();
@@ -296,23 +358,37 @@ async function main() {
   program
     .name("opencode-mcp")
     .description("MCP server for OpenCode CLI integration")
-    .version("1.2.0")
-    .requiredOption("-m, --model <model>", "Primary model to use (e.g., google/gemini-2.5-pro)")
+    .version("1.4.0")
+    .option("-m, --model <model>", "Primary model to use (e.g., google/gemini-2.5-pro)")
     .option("-f, --fallback-model <model>", "Fallback model for quota/error situations")
+    .option("--setup", "Run interactive setup wizard")
     .parse();
 
   const options = program.opts();
 
+  // Handle --setup flag
+  if (options.setup) {
+    await runSetupWizard();
+    process.exit(0);
+  }
+
+  // Resolve model using the resolution chain
+  const resolved = await resolveModel(options.model, options.fallbackModel);
+
   // Store server configuration globally
   const config = {
-    primaryModel: options.model,
-    fallbackModel: options.fallbackModel
+    primaryModel: resolved.model,
+    fallbackModel: resolved.fallback,
+    defaultAgent: resolved.agent,
   };
   setServerConfig(config);
 
   Logger.debug("init opencode-mcp-tool with model:", config.primaryModel);
   if (config.fallbackModel) {
     Logger.debug("fallback model:", config.fallbackModel);
+  }
+  if (config.defaultAgent) {
+    Logger.debug("default agent:", config.defaultAgent);
   }
 
   const transport = new StdioServerTransport();

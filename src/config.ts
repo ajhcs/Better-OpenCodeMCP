@@ -3,6 +3,7 @@
 export interface ServerConfig {
   primaryModel: string;
   fallbackModel?: string;
+  defaultAgent?: 'build' | 'plan' | 'explore';
 }
 
 let serverConfig: ServerConfig | null = null;

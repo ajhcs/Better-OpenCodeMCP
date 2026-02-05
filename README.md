@@ -15,6 +15,7 @@ A Model Context Protocol (MCP) server that allows AI assistants to interact with
 
 ## What's Different in This Fork
 
+- **Install wizard** - Interactive setup with auto-detection from OpenCode's configured model
 - **Async task architecture** - Non-blocking execution with immediate task IDs for background processing
 - **Fixed concurrent execution** - Original had race conditions when multiple tool calls ran simultaneously
 - **Process pooling** - Limits concurrent child processes to prevent resource exhaustion
@@ -31,10 +32,46 @@ Before using this tool, ensure you have:
 1. **[Node.js](https://nodejs.org/)** (v16.0.0 or higher)
 2. **[OpenCode CLI](https://github.com/fictiverse/opencode)** installed and configured
 
-### One-Line Setup
+### Quick Setup (Recommended)
+
+**Option 1: Interactive Setup Wizard**
 
 ```bash
-claude mcp add opencode -- npx -y github:ajhcs/Better-OpenCodeMCP -- --model google/gemini-2.5-pro
+# Clone and run setup
+git clone https://github.com/ajhcs/Better-OpenCodeMCP.git
+cd Better-OpenCodeMCP
+npm install && npm run build
+node dist/index.js --setup
+```
+
+The wizard will:
+- Fetch available models from your OpenCode installation
+- Let you pick primary and fallback models
+- Configure default agent mode
+- Save settings to `~/.config/opencode-mcp/config.json`
+
+**Option 2: Auto-Detection**
+
+If you've used OpenCode before, the server automatically detects your most recently used model. Just run without flags:
+
+```bash
+node dist/index.js
+```
+
+**Option 3: Explicit Model**
+
+```bash
+node dist/index.js --model google/gemini-2.5-pro
+```
+
+### Add to Claude Code
+
+```bash
+# After running --setup or with auto-detection
+claude mcp add opencode -- node /path/to/Better-OpenCodeMCP/dist/index.js
+
+# Or with explicit model
+claude mcp add opencode -- node /path/to/Better-OpenCodeMCP/dist/index.js -- --model google/gemini-2.5-pro
 ```
 
 ### Verify Installation
@@ -43,52 +80,53 @@ Type `/mcp` inside Claude Code to verify the opencode MCP is active.
 
 ---
 
-### Alternative: Import from Claude Desktop
+## Configuration
 
-If you already have it configured in Claude Desktop:
+The server resolves the model in this order:
 
-1. Add to your Claude Desktop config:
+1. **CLI flag** - `--model` if explicitly provided
+2. **Config file** - `~/.config/opencode-mcp/config.json` (created by `--setup`)
+3. **Auto-detect** - Your most recently used model in OpenCode
+4. **Interactive** - Launches wizard if running in a terminal
+5. **Error** - Shows helpful setup instructions
+
+### Config File Format
+
+Created by `--setup` wizard at `~/.config/opencode-mcp/config.json`:
+
 ```json
-"opencode": {
-  "command": "npx",
-  "args": ["-y", "github:ajhcs/Better-OpenCodeMCP", "--", "--model", "google/gemini-2.5-pro"]
+{
+  "model": "google/gemini-2.5-pro",
+  "fallbackModel": "deepseek/deepseek-chat",
+  "defaults": {
+    "agent": "build"
+  }
 }
 ```
 
-2. Import to Claude Code:
-```bash
-claude mcp add-from-claude-desktop
-```
+### MCP Client Configuration
 
-## Configuration
-
-Register the MCP server with your MCP client. **Note: The server requires a primary model to be specified.**
-
-### For NPX Usage (Recommended)
-
-Add this configuration to your Claude Desktop config file:
+For Claude Desktop, add to your config:
 
 ```json
 {
   "mcpServers": {
     "opencode": {
-      "command": "npx",
-      "args": ["-y", "github:ajhcs/Better-OpenCodeMCP", "--", "--model", "google/gemini-2.5-pro", "--fallback-model", "google/gemini-2.5-flash"]
+      "command": "node",
+      "args": ["/path/to/Better-OpenCodeMCP/dist/index.js"]
     }
   }
 }
 ```
 
-### For Global Installation
-
-If you installed globally, use this configuration instead:
+Or with explicit model:
 
 ```json
 {
   "mcpServers": {
     "opencode": {
-      "command": "opencode-mcp",
-      "args": ["--model", "google/gemini-2.5-pro", "--fallback-model", "google/gemini-2.5-flash"]
+      "command": "node",
+      "args": ["/path/to/Better-OpenCodeMCP/dist/index.js", "--model", "google/gemini-2.5-pro"]
     }
   }
 }
