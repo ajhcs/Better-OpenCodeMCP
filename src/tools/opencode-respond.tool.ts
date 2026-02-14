@@ -10,7 +10,8 @@ import { UnifiedTool } from "./registry.js";
 import { getTaskManager } from "../tasks/sharedTaskManager.js";
 import { parseOpenCodeEvent, OpenCodeEvent } from "../utils/jsonEventParser.js";
 import { Logger } from "../utils/logger.js";
-import { CLI } from "../constants.js";
+import { CLI, LIMITS, PROCESS } from "../constants.js";
+import { killProcess } from "../utils/processKill.js";
 import { TaskStatus } from "../tasks/taskManager.js";
 
 // ============================================================================
@@ -25,6 +26,7 @@ const opencodeRespondArgsSchema = z.object({
   response: z
     .string()
     .min(1)
+    .max(LIMITS.MAX_RESPONSE_LENGTH)
     .describe("The response text to send to the OpenCode session"),
 });
 
@@ -50,6 +52,9 @@ export interface OpenCodeRespondResult {
 /** Map of taskId to spawned process for respond operations */
 const activeRespondProcesses = new Map<string, ChildProcess>();
 
+/** Map of taskId to timeout handle for respond process runtime limits */
+const respondTimeouts = new Map<string, NodeJS.Timeout>();
+
 /**
  * Spawns OpenCode process with session continuation and processes events.
  */
@@ -72,10 +77,20 @@ function spawnOpenCodeRespondProcess(
   // Spawn the process
   const proc = spawn(CLI.COMMANDS.OPENCODE, args, {
     stdio: ["ignore", "pipe", "pipe"],
-    shell: true,
+    shell: false,
   });
 
   activeRespondProcesses.set(taskId, proc);
+
+  // Set process timeout
+  const timeout = setTimeout(() => {
+    Logger.warn(`Respond process timeout for task ${taskId} after ${PROCESS.MAX_RUNTIME_MS / 1000}s`);
+    killProcess(proc);
+    taskManager.failTask(taskId, `Respond process timed out after ${PROCESS.MAX_RUNTIME_MS / 1000} seconds`);
+    activeRespondProcesses.delete(taskId);
+    respondTimeouts.delete(taskId);
+  }, PROCESS.MAX_RUNTIME_MS);
+  respondTimeouts.set(taskId, timeout);
 
   // Buffer for incomplete lines
   let buffer = "";
@@ -107,6 +122,9 @@ function spawnOpenCodeRespondProcess(
   // Handle process errors
   proc.on("error", (error: Error) => {
     Logger.error(`OpenCode respond process error [${taskId}]:`, error);
+    const t = respondTimeouts.get(taskId);
+    if (t) clearTimeout(t);
+    respondTimeouts.delete(taskId);
     taskManager.failTask(taskId, `Respond process error: ${error.message}`);
     activeRespondProcesses.delete(taskId);
   });
@@ -114,6 +132,11 @@ function spawnOpenCodeRespondProcess(
   // Handle process exit
   proc.on("close", (code: number | null, signal: NodeJS.Signals | null) => {
     Logger.debug(`OpenCode respond process closed [${taskId}]: code=${code}, signal=${signal}`);
+
+    // Clear the timeout
+    const t = respondTimeouts.get(taskId);
+    if (t) clearTimeout(t);
+    respondTimeouts.delete(taskId);
 
     // Process any remaining buffer content
     if (buffer.trim()) {
@@ -265,9 +288,13 @@ ERROR CONDITIONS:
 export function cleanupActiveRespondProcesses(): void {
   for (const [taskId, proc] of activeRespondProcesses) {
     Logger.debug(`Killing respond process for task ${taskId}`);
-    proc.kill("SIGTERM");
+    killProcess(proc);
   }
   activeRespondProcesses.clear();
+  for (const t of respondTimeouts.values()) {
+    clearTimeout(t);
+  }
+  respondTimeouts.clear();
 }
 
 /**

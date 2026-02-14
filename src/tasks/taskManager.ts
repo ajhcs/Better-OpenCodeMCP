@@ -6,6 +6,7 @@
 
 import { randomBytes } from "node:crypto";
 import { Logger } from "../utils/logger.js";
+import { PROCESS } from "../constants.js";
 import {
   OpenCodeEvent,
   isStepStartEvent,
@@ -215,9 +216,15 @@ export class TaskManager {
       // Step start -> working
       this.updateStatus(taskId, "working");
     } else if (isTextEvent(event)) {
-      // Text event -> stay working, accumulate text
+      // Text event -> stay working, accumulate text (capped at max size)
       const text = extractText(event);
-      state.accumulatedText += text;
+      if (state.accumulatedText.length < PROCESS.MAX_ACCUMULATED_TEXT_BYTES) {
+        state.accumulatedText += text;
+        if (state.accumulatedText.length > PROCESS.MAX_ACCUMULATED_TEXT_BYTES) {
+          state.accumulatedText = state.accumulatedText.slice(0, PROCESS.MAX_ACCUMULATED_TEXT_BYTES);
+          Logger.warn(`Task ${taskId} accumulated text capped at ${PROCESS.MAX_ACCUMULATED_TEXT_BYTES} bytes`);
+        }
+      }
       state.lastTextEventAt = new Date();
 
       // Check for question pattern and schedule input_required detection
@@ -350,6 +357,34 @@ export class TaskManager {
   removeTask(taskId: string): boolean {
     this.clearInputRequiredTimer(taskId);
     return this.tasks.delete(taskId);
+  }
+
+  /**
+   * Purges completed/failed/cancelled tasks older than the given age.
+   * Helps prevent unbounded memory growth from accumulated task history.
+   *
+   * @param maxAgeMs - Maximum age in milliseconds for terminal tasks
+   * @returns Number of tasks purged
+   */
+  purgeCompletedTasks(maxAgeMs: number): number {
+    const now = Date.now();
+    let purged = 0;
+
+    for (const [taskId, state] of this.tasks) {
+      if (this.isTerminalStatus(state.status)) {
+        const age = now - state.metadata.lastEventAt.getTime();
+        if (age > maxAgeMs) {
+          this.tasks.delete(taskId);
+          purged++;
+        }
+      }
+    }
+
+    if (purged > 0) {
+      Logger.debug(`Purged ${purged} completed tasks older than ${maxAgeMs / 1000}s`);
+    }
+
+    return purged;
   }
 
   /**

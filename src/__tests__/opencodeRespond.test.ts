@@ -317,7 +317,7 @@ describe("opencodeRespondTool", () => {
         ["--session", "mock-session-123", "--format", "json", "Yes, please continue"],
         expect.objectContaining({
           stdio: ["ignore", "pipe", "pipe"],
-          shell: true,
+          shell: false,
         })
       );
     });

@@ -160,7 +160,7 @@ describe("opencodeTool", () => {
         expect.any(Array),
         expect.objectContaining({
           stdio: ["ignore", "pipe", "pipe"],
-          shell: true,
+          shell: false,
         })
       );
     });
@@ -531,6 +531,29 @@ describe("opencodeTool", () => {
         });
         expect(result.success).toBe(true);
       }
+    });
+
+    it("should reject invalid model format", () => {
+      const result = opencodeTool.zodSchema.safeParse({
+        task: "Valid task",
+        model: "invalid model name",
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it("should accept valid model format", () => {
+      const result = opencodeTool.zodSchema.safeParse({
+        task: "Valid task",
+        model: "google/gemini-2.5-pro",
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it("should reject task exceeding max length", () => {
+      const result = opencodeTool.zodSchema.safeParse({
+        task: "x".repeat(100_001),
+      });
+      expect(result.success).toBe(false);
     });
 
     it("should accept optional parameters as undefined", () => {

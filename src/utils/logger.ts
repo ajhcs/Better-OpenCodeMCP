@@ -1,40 +1,88 @@
-// WIP
-import { LOG_PREFIX } from "../constants.js";
+/**
+ * Logger with configurable log-level filtering.
+ * All output goes to stderr to avoid interfering with MCP stdio transport.
+ * @module utils/logger
+ */
+
+import { LOG_PREFIX, LOG_LEVELS } from "../constants.js";
+import type { LogLevel } from "../constants.js";
 
 export class Logger {
-  private static formatMessage(message: string): string {
-    return `${LOG_PREFIX} ${message}` + "\n";
+  private static level: LogLevel = "warn";
+
+  private static formatMessage(level: string, message: string): string {
+    return `${LOG_PREFIX} [${level.toUpperCase()}] ${message}\n`;
   }
 
-  static log(message: string, ...args: any[]): void {
-    console.warn(this.formatMessage(message), ...args);
+  private static shouldLog(level: LogLevel): boolean {
+    return LOG_LEVELS[level] >= LOG_LEVELS[this.level];
   }
 
-  static warn(message: string, ...args: any[]): void {
-    console.warn(this.formatMessage(message), ...args);
+  static setLevel(level: LogLevel): void {
+    this.level = level;
   }
 
-  static error(message: string, ...args: any[]): void {
-    console.error(this.formatMessage(message), ...args);
+  static getLevel(): LogLevel {
+    return this.level;
   }
 
-  static debug(message: string, ...args: any[]): void {
-    console.warn(this.formatMessage(message), ...args);
+  static log(message: string, ...args: unknown[]): void {
+    if (this.shouldLog("info")) {
+      console.warn(this.formatMessage("info", message), ...args);
+    }
   }
 
-  static toolInvocation(toolName: string, args: any): void {
-    this.warn("Raw:", JSON.stringify(args, null, 2));
+  static info(message: string, ...args: unknown[]): void {
+    if (this.shouldLog("info")) {
+      console.warn(this.formatMessage("info", message), ...args);
+    }
+  }
+
+  static warn(message: string, ...args: unknown[]): void {
+    if (this.shouldLog("warn")) {
+      console.warn(this.formatMessage("warn", message), ...args);
+    }
+  }
+
+  static error(message: string, ...args: unknown[]): void {
+    if (this.shouldLog("error")) {
+      console.error(this.formatMessage("error", message), ...args);
+    }
+  }
+
+  static debug(message: string, ...args: unknown[]): void {
+    if (this.shouldLog("debug")) {
+      console.warn(this.formatMessage("debug", message), ...args);
+    }
+  }
+
+  static toolInvocation(toolName: string, args: unknown): void {
+    if (this.shouldLog("debug")) {
+      this.debug(`Tool invocation [${toolName}]: ${JSON.stringify(args, null, 2)}`);
+    }
   }
 
   static toolParsedArgs(prompt: string, agent: string, model?: string): void {
-    this.warn(`Parsed prompt: "${prompt}"\nagent: ${agent}${model ? `\nmodel: ${model}` : ''}`);
+    if (this.shouldLog("debug")) {
+      this.debug(`Parsed prompt: "${prompt}"\nagent: ${agent}${model ? `\nmodel: ${model}` : ""}`);
+    }
   }
 
   static commandExecution(command: string, args: string[], startTime: number): void {
-    this.warn(`[${startTime}] Starting: ${command} ${args.map((arg) => `"${arg}"`).join(" ")}`);
+    if (this.shouldLog("debug")) {
+      this.debug(`[${startTime}] Starting: ${command} ${args.map((arg) => `"${arg}"`).join(" ")}`);
+    }
 
     // Store command execution start for timing analysis
     this._commandStartTimes.set(startTime, { command, args, startTime });
+
+    // Purge stale entries older than 30 minutes
+    const staleThreshold = Date.now() - 30 * 60 * 1000;
+    for (const [key] of this._commandStartTimes) {
+      if (key < staleThreshold) {
+        this._commandStartTimes.delete(key);
+      }
+    }
   }
 
   // Track command start times for duration calculation
@@ -42,9 +90,11 @@ export class Logger {
 
   static commandComplete(startTime: number, exitCode: number | null, outputLength?: number): void {
     const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-    this.warn(`[${elapsed}s] Process finished with exit code: ${exitCode}`);
-    if (outputLength !== undefined) {
-      this.warn(`Response: ${outputLength} chars`);
+    if (this.shouldLog("debug")) {
+      this.debug(`[${elapsed}s] Process finished with exit code: ${exitCode}`);
+      if (outputLength !== undefined) {
+        this.debug(`Response: ${outputLength} chars`);
+      }
     }
 
     // Clean up command tracking

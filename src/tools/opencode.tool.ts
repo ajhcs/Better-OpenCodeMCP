@@ -11,7 +11,8 @@ import { getTaskManager } from "../tasks/sharedTaskManager.js";
 import { parseOpenCodeEvent, OpenCodeEvent } from "../utils/jsonEventParser.js";
 import { getServerConfig } from "../config.js";
 import { Logger } from "../utils/logger.js";
-import { CLI } from "../constants.js";
+import { CLI, LIMITS, PROCESS } from "../constants.js";
+import { killProcess } from "../utils/processKill.js";
 
 // ============================================================================
 // Schema
@@ -21,6 +22,7 @@ const opencodeArgsSchema = z.object({
   task: z
     .string()
     .min(1)
+    .max(LIMITS.MAX_TASK_LENGTH)
     .describe("The task/prompt to send to OpenCode for autonomous execution"),
   agent: z
     .enum(["explore", "plan", "build"])
@@ -28,14 +30,18 @@ const opencodeArgsSchema = z.object({
     .describe("OpenCode agent mode: 'explore' for investigation, 'plan' for structured analysis, 'build' for immediate execution"),
   outputGuidance: z
     .string()
+    .max(LIMITS.MAX_OUTPUT_GUIDANCE_LENGTH)
     .optional()
     .describe("Instructions for how OpenCode should format its output"),
   model: z
     .string()
+    .max(LIMITS.MAX_MODEL_LENGTH)
+    .regex(/^[a-zA-Z0-9_-]+\/[a-zA-Z0-9._-]+$/, "Model must be in format 'provider/model-name'")
     .optional()
     .describe("Override default model (e.g., 'google/gemini-2.5-pro')"),
   sessionTitle: z
     .string()
+    .max(LIMITS.MAX_SESSION_TITLE_LENGTH)
     .optional()
     .describe("Human-readable session name for tracking"),
 });
@@ -64,6 +70,9 @@ export interface OpenCodeToolResult {
 
 /** Map of taskId to spawned process for cleanup */
 const activeProcesses = new Map<string, ChildProcess>();
+
+/** Map of taskId to timeout handle for process runtime limits */
+const processTimeouts = new Map<string, NodeJS.Timeout>();
 
 /**
  * Spawns OpenCode process with JSON format and processes events.
@@ -98,10 +107,20 @@ function spawnOpenCodeProcess(
   // Spawn the process
   const proc = spawn(CLI.COMMANDS.OPENCODE, args, {
     stdio: ["ignore", "pipe", "pipe"],
-    shell: true,
+    shell: false,
   });
 
   activeProcesses.set(taskId, proc);
+
+  // Set process timeout
+  const timeout = setTimeout(() => {
+    Logger.warn(`Process timeout for task ${taskId} after ${PROCESS.MAX_RUNTIME_MS / 1000}s`);
+    killProcess(proc);
+    taskManager.failTask(taskId, `Process timed out after ${PROCESS.MAX_RUNTIME_MS / 1000} seconds`);
+    activeProcesses.delete(taskId);
+    processTimeouts.delete(taskId);
+  }, PROCESS.MAX_RUNTIME_MS);
+  processTimeouts.set(taskId, timeout);
 
   // Buffer for incomplete lines
   let buffer = "";
@@ -133,6 +152,9 @@ function spawnOpenCodeProcess(
   // Handle process errors
   proc.on("error", (error: Error) => {
     Logger.error(`OpenCode process error [${taskId}]:`, error);
+    const t = processTimeouts.get(taskId);
+    if (t) clearTimeout(t);
+    processTimeouts.delete(taskId);
     taskManager.failTask(taskId, `Process error: ${error.message}`);
     activeProcesses.delete(taskId);
   });
@@ -140,6 +162,11 @@ function spawnOpenCodeProcess(
   // Handle process exit
   proc.on("close", (code: number | null, signal: NodeJS.Signals | null) => {
     Logger.debug(`OpenCode process closed [${taskId}]: code=${code}, signal=${signal}`);
+
+    // Clear the timeout
+    const t = processTimeouts.get(taskId);
+    if (t) clearTimeout(t);
+    processTimeouts.delete(taskId);
 
     // Process any remaining buffer content
     if (buffer.trim()) {
@@ -157,8 +184,6 @@ function spawnOpenCodeProcess(
       } else if (signal) {
         taskManager.failTask(taskId, `Process killed by signal ${signal}`);
       }
-      // If code is 0 but status is still working, the step_finish event should have handled completion
-      // This is a fallback for edge cases
     }
 
     activeProcesses.delete(taskId);
@@ -271,9 +296,28 @@ NOTE: This is an async operation. The task continues running after this tool ret
 export function cleanupActiveProcesses(): void {
   for (const [taskId, proc] of activeProcesses) {
     Logger.debug(`Killing process for task ${taskId}`);
-    proc.kill("SIGTERM");
+    killProcess(proc);
   }
   activeProcesses.clear();
+  for (const t of processTimeouts.values()) {
+    clearTimeout(t);
+  }
+  processTimeouts.clear();
+}
+
+/**
+ * Kills the process for a specific task.
+ * @returns true if a process was found and killed, false if no process was running
+ */
+export function killTaskProcess(taskId: string): boolean {
+  const proc = activeProcesses.get(taskId);
+  if (!proc) return false;
+  killProcess(proc);
+  activeProcesses.delete(taskId);
+  const t = processTimeouts.get(taskId);
+  if (t) clearTimeout(t);
+  processTimeouts.delete(taskId);
+  return true;
 }
 
 /**

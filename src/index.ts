@@ -19,6 +19,7 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { Logger } from "./utils/logger.js";
 import { PROTOCOL, ToolArguments } from "./constants.js";
+import type { LogLevel } from "./constants.js";
 import { setServerConfig } from "./config.js";
 import { loadConfig, autoDetectModel, isInteractive, getConfigPath } from "./config/index.js";
 import { runSetupWizard } from "./commands/setup.js";
@@ -30,6 +31,10 @@ import {
   toolExists,
   getPromptMessage
 } from "./tools/index.js";
+import { cleanupActiveProcesses } from "./tools/opencode.tool.js";
+import { cleanupActiveRespondProcesses } from "./tools/opencode-respond.tool.js";
+import { resetTaskManager } from "./tasks/sharedTaskManager.js";
+import { PROCESS } from "./constants.js";
 
 const server = new Server(
   {
@@ -361,10 +366,22 @@ async function main() {
     .version("1.4.0")
     .option("-m, --model <model>", "Primary model to use (e.g., google/gemini-2.5-pro)")
     .option("-f, --fallback-model <model>", "Fallback model for quota/error situations")
+    .option("--log-level <level>", "Log level: debug, info, warn, error, silent (default: warn)")
     .option("--setup", "Run interactive setup wizard")
     .parse();
 
   const options = program.opts();
+
+  // Set log level if provided
+  if (options.logLevel) {
+    const validLevels = ["debug", "info", "warn", "error", "silent"];
+    if (validLevels.includes(options.logLevel)) {
+      Logger.setLevel(options.logLevel as LogLevel);
+    } else {
+      console.error(`Invalid log level: ${options.logLevel}. Valid: ${validLevels.join(", ")}`);
+      process.exit(1);
+    }
+  }
 
   // Handle --setup flag
   if (options.setup) {
@@ -393,10 +410,61 @@ async function main() {
 
   const transport = new StdioServerTransport();
   await server.connect(transport);
+
+  // Start periodic task purge
+  const { getTaskManager } = await import("./tasks/sharedTaskManager.js");
+  purgeInterval = setInterval(() => {
+    getTaskManager().purgeCompletedTasks(PROCESS.COMPLETED_TASK_MAX_AGE_MS);
+  }, PROCESS.PURGE_INTERVAL_MS);
+
   Logger.debug("opencode-mcp-tool listening on stdio");
 }
+
+// ============================================================================
+// Shutdown Handling
+// ============================================================================
+
+let isShuttingDown = false;
+
+function gracefulShutdown(signal: string): void {
+  if (isShuttingDown) return;
+  isShuttingDown = true;
+
+  Logger.debug(`Received ${signal}, shutting down gracefully...`);
+
+  // Kill all active processes
+  cleanupActiveProcesses();
+  cleanupActiveRespondProcesses();
+
+  // Clear progress contexts
+  for (const [, ctx] of progressContexts) {
+    if (ctx.interval) clearInterval(ctx.interval);
+  }
+  progressContexts.clear();
+
+  // Reset task manager (clears timers and tasks)
+  resetTaskManager();
+
+  // Clear purge interval
+  if (purgeInterval) {
+    clearInterval(purgeInterval);
+  }
+
+  Logger.debug("Shutdown complete");
+  process.exit(0);
+}
+
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
+process.on("SIGHUP", () => gracefulShutdown("SIGHUP"));
+
+// ============================================================================
+// Periodic Task Purge
+// ============================================================================
+
+let purgeInterval: NodeJS.Timeout | null = null;
 
 main().catch((error) => {
   Logger.error("Fatal error:", error);
   process.exit(1);
-}); 
+});
