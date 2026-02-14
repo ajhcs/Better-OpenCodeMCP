@@ -599,6 +599,126 @@ describe("TaskManager", () => {
     });
   });
 
+  describe("purgeCompletedTasks", () => {
+    it("should purge completed tasks older than max age", async () => {
+      const taskId = await manager.createTask({
+        title: "Old Task",
+        model: "test-model",
+      });
+
+      // Complete the task
+      await manager.handleEvent(taskId, createStepFinishEvent("stop"));
+      expect(manager.getTaskStatus(taskId)).toBe("completed");
+
+      // Advance time past max age
+      vi.advanceTimersByTime(60 * 60 * 1000 + 1); // 1 hour + 1ms
+
+      const purged = manager.purgeCompletedTasks(60 * 60 * 1000);
+      expect(purged).toBe(1);
+      expect(manager.getTaskStatus(taskId)).toBeUndefined();
+    });
+
+    it("should not purge active tasks", async () => {
+      const taskId = await manager.createTask({
+        title: "Active Task",
+        model: "test-model",
+      });
+
+      vi.advanceTimersByTime(60 * 60 * 1000 + 1);
+
+      const purged = manager.purgeCompletedTasks(60 * 60 * 1000);
+      expect(purged).toBe(0);
+      expect(manager.getTaskStatus(taskId)).toBe("working");
+    });
+
+    it("should not purge completed tasks within max age", async () => {
+      const taskId = await manager.createTask({
+        title: "Recent Task",
+        model: "test-model",
+      });
+
+      await manager.handleEvent(taskId, createStepFinishEvent("stop"));
+
+      // Only advance 30 minutes (less than 1 hour max age)
+      vi.advanceTimersByTime(30 * 60 * 1000);
+
+      const purged = manager.purgeCompletedTasks(60 * 60 * 1000);
+      expect(purged).toBe(0);
+      expect(manager.getTaskStatus(taskId)).toBe("completed");
+    });
+
+    it("should purge failed and cancelled tasks too", async () => {
+      const taskId1 = await manager.createTask({ title: "Failed", model: "m" });
+      const taskId2 = await manager.createTask({ title: "Cancelled", model: "m" });
+
+      await manager.failTask(taskId1, "err");
+      await manager.cancelTask(taskId2);
+
+      vi.advanceTimersByTime(60 * 60 * 1000 + 1);
+
+      const purged = manager.purgeCompletedTasks(60 * 60 * 1000);
+      expect(purged).toBe(2);
+    });
+  });
+
+  describe("memory cap (accumulated text)", () => {
+    it("should cap accumulated text at MAX_ACCUMULATED_TEXT_BYTES", async () => {
+      const taskId = await manager.createTask({
+        title: "Big Text Task",
+        model: "test-model",
+      });
+
+      // Send text events totaling > 1MB
+      const chunkSize = 100_000; // 100KB per chunk
+      const chunk = "x".repeat(chunkSize);
+      for (let i = 0; i < 12; i++) {
+        await manager.handleEvent(taskId, createTextEvent(chunk));
+      }
+
+      const state = manager.getTaskState(taskId);
+      // Should be capped at 1MB (1,048,576 bytes)
+      expect(state!.accumulatedText.length).toBeLessThanOrEqual(1_048_576);
+    });
+
+    it("should still process events after text cap is reached", async () => {
+      const taskId = await manager.createTask({
+        title: "Test",
+        model: "test-model",
+      });
+
+      // Fill past the cap
+      const bigText = "x".repeat(1_048_577);
+      await manager.handleEvent(taskId, createTextEvent(bigText));
+
+      // Task should still be working and accept more events
+      expect(manager.getTaskStatus(taskId)).toBe("working");
+
+      // Complete the task
+      await manager.handleEvent(taskId, createStepFinishEvent("stop"));
+      expect(manager.getTaskStatus(taskId)).toBe("completed");
+    });
+
+    it("should not add more text once cap is reached", async () => {
+      const taskId = await manager.createTask({
+        title: "Test",
+        model: "test-model",
+      });
+
+      // Fill to exact cap
+      const exactCap = "a".repeat(1_048_576);
+      await manager.handleEvent(taskId, createTextEvent(exactCap));
+
+      const stateBefore = manager.getTaskState(taskId);
+      const lenBefore = stateBefore!.accumulatedText.length;
+
+      // Try to add more - should be ignored since already at cap
+      await manager.handleEvent(taskId, createTextEvent("more text"));
+
+      const stateAfter = manager.getTaskState(taskId);
+      expect(stateAfter!.accumulatedText.length).toBe(lenBefore);
+    });
+  });
+
   describe("integration scenarios", () => {
     it("should handle a complete tool-using workflow", async () => {
       const taskId = await manager.createTask({

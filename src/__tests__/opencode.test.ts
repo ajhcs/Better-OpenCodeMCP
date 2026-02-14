@@ -549,6 +549,40 @@ describe("opencodeTool", () => {
       expect(result.success).toBe(true);
     });
 
+    it("should accept nested provider model format", () => {
+      const result = opencodeTool.zodSchema.safeParse({
+        task: "Valid task",
+        model: "lmstudio/google/gemma-3n-e4b",
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it("should accept various valid model formats", () => {
+      const validModels = [
+        "anthropic/claude-sonnet-4-20250514",
+        "openai/gpt-4o",
+        "deepseek/deepseek-chat",
+        "google/gemini-2.5-flash",
+        "lmstudio/google/gemma-3n-e4b",
+        "ollama/llama3.1",
+      ];
+      for (const model of validModels) {
+        const result = opencodeTool.zodSchema.safeParse({
+          task: "Valid task",
+          model,
+        });
+        expect(result.success).toBe(true);
+      }
+    });
+
+    it("should reject model without provider prefix", () => {
+      const result = opencodeTool.zodSchema.safeParse({
+        task: "Valid task",
+        model: "gemini-2.5-pro",
+      });
+      expect(result.success).toBe(false);
+    });
+
     it("should reject task exceeding max length", () => {
       const result = opencodeTool.zodSchema.safeParse({
         task: "x".repeat(100_001),

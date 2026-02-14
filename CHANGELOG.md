@@ -5,7 +5,7 @@
 ### Security
 - **BREAKING**: Remove `shell: true` from all spawn calls (eliminates command injection RCE vulnerability)
 - Add input length limits to all Zod schemas (task, model, response, session title, output guidance)
-- Add model parameter format validation (`provider/model-name` pattern required)
+- Add model parameter format validation (supports nested providers like `lmstudio/google/gemma-3n-e4b`)
 
 ### Added
 - `opencode_cancel` tool - cancel running tasks and kill associated processes

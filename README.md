@@ -5,7 +5,7 @@
 [![GitHub Release](https://img.shields.io/github/v/release/ajhcs/Better-OpenCodeMCP?logo=github&label=GitHub)](https://github.com/ajhcs/Better-OpenCodeMCP/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Open Source](https://img.shields.io/badge/Open%20Source-red.svg)](https://github.com/ajhcs/Better-OpenCodeMCP)
-[![Tests](https://img.shields.io/badge/tests-257%20passing-brightgreen.svg)](https://github.com/ajhcs/Better-OpenCodeMCP)
+[![Tests](https://img.shields.io/badge/tests-292%20passing-brightgreen.svg)](https://github.com/ajhcs/Better-OpenCodeMCP)
 
 </div>
 
@@ -19,7 +19,7 @@ A Model Context Protocol (MCP) server that allows AI assistants to interact with
 - **Async task architecture** - Non-blocking execution with immediate task IDs for background processing
 - **Fixed concurrent execution** - Original had race conditions when multiple tool calls ran simultaneously
 - **Process pooling** - Limits concurrent child processes to prevent resource exhaustion
-- **Comprehensive test suite** - 257 tests covering core functionality, async operations, and concurrency
+- **Comprehensive test suite** - 292 tests covering core functionality, async operations, concurrency, process management, and persistence
 - **Security hardened** - No shell injection, input validation, process timeouts
 - **Persistence** - Task state saved to disk for crash recovery
 - **Graceful shutdown** - Proper cleanup on SIGINT/SIGTERM with process termination
@@ -181,7 +181,7 @@ Delegate a task to OpenCode for autonomous execution. Returns immediately with a
 |-----------|------|----------|-------------|
 | `task` | string | Yes | The task/prompt to send to OpenCode |
 | `agent` | string | No | Agent mode: `explore`, `plan`, or `build` |
-| `model` | string | No | Override default model (e.g., `google/gemini-2.5-pro`) |
+| `model` | string | No | Override default model (e.g., `google/gemini-2.5-pro`, `lmstudio/google/gemma-3n-e4b`) |
 | `outputGuidance` | string | No | Instructions for output formatting |
 | `sessionTitle` | string | No | Human-readable name for tracking |
 

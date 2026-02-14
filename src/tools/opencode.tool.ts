@@ -37,7 +37,7 @@ const opencodeArgsSchema = z.object({
   model: z
     .string()
     .max(LIMITS.MAX_MODEL_LENGTH)
-    .regex(/^[a-zA-Z0-9_-]+\/[a-zA-Z0-9._-]+$/, "Model must be in format 'provider/model-name'")
+    .regex(/^[a-zA-Z0-9_-]+\/[a-zA-Z0-9._\/-]+$/, "Model must be in format 'provider/model-name' (nested providers like 'lmstudio/google/gemma' are supported)")
     .optional()
     .describe("Override default model (e.g., 'google/gemini-2.5-pro')"),
   sessionTitle: z

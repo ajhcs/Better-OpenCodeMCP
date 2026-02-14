@@ -4,7 +4,7 @@
  * @module utils/processKill
  */
 
-import { ChildProcess } from "node:child_process";
+import { ChildProcess, execSync } from "node:child_process";
 import { Logger } from "./logger.js";
 
 /**
@@ -20,7 +20,6 @@ export function killProcess(proc: ChildProcess): void {
   try {
     if (process.platform === "win32") {
       // On Windows, SIGTERM doesn't work reliably. Use taskkill.
-      const { execSync } = require("node:child_process");
       try {
         execSync(`taskkill /pid ${proc.pid} /T /F`, { stdio: "ignore" });
       } catch {
