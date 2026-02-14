@@ -3,7 +3,6 @@
 ## [2.0.0] - 2026-02-14
 
 ### Security
-- **BREAKING**: Remove `shell: true` from all spawn calls (eliminates command injection RCE vulnerability)
 - Add input length limits to all Zod schemas (task, model, response, session title, output guidance)
 - Add model parameter format validation (supports nested providers like `lmstudio/google/gemma-3n-e4b`)
 
@@ -26,6 +25,11 @@
 - Process pool now uses configurable size from constants
 
 ### Fixed
+- Windows task execution: add missing `run` subcommand required by OpenCode CLI
+- Windows .cmd wrapper spawning: use `shell: true` for correct process execution
+- Error event handling: model-not-found and similar errors now surface as task failures
+- Auto-detect: OpenCode uses XDG paths on Windows, not `%LOCALAPPDATA%`
+- Model regex: support nested providers (e.g., `lmstudio/google/gemma-3n-e4b`)
 - Unbounded memory growth from accumulated task text (capped at 1MB)
 - Stale command tracking entries in logger (purged after 30 minutes)
 - Missing cleanup of process timeouts on shutdown
