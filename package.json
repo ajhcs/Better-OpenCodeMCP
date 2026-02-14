@@ -1,6 +1,6 @@
 {
   "name": "opencode-mcp-tool",
-  "version": "1.4.0",
+  "version": "2.0.0",
   "description": "MCP server for OpenCode CLI integration",
   "type": "module",
   "main": "dist/index.js",
@@ -14,12 +14,17 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "tsc --noEmit",
+    "prepare": "npm run build",
     "prepublishOnly": "echo '⚠️  Remember to test locally first!' && npm run build"
   },
   "keywords": [
     "mcp",
+    "mcp-server",
     "modelcontextprotocol",
     "opencode",
+    "claude",
+    "anthropic",
+    "multi-model",
     "cli",
     "ai",
     "llm"

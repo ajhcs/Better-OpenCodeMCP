@@ -40,7 +40,7 @@ import { PROCESS } from "./constants.js";
 const server = new Server(
   {
     name: "opencode-mcp",
-    version: "1.4.0",
+    version: "2.0.0",
   }, {
   capabilities: {
     tools: {},
@@ -69,7 +69,7 @@ function generateRequestId(): string {
   return `req-${Date.now()}-${++requestCounter}`;
 }
 
-async function sendNotification(method: string, params: any) {
+async function sendNotification(method: string, params: Record<string, unknown>) {
   try {
     await server.notification({ method, params });
   } catch (error) {
@@ -92,12 +92,12 @@ async function sendProgressNotification(
   if (!progressToken) return; // Only send if client requested progress
 
   try {
-    const params: any = {
+    const params: Record<string, unknown> = {
       progressToken,
-      progress
+      progress,
     };
 
-    if (total !== undefined) params.total = total; // future cache progress
+    if (total !== undefined) params.total = total;
     if (message) params.message = message;
 
     await server.notification({
@@ -217,7 +217,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request: CallToolRequest)
 
   if (toolExists(toolName)) {
     // Check if client requested progress updates
-    const progressToken = (request.params as any)._meta?.progressToken;
+    const progressToken = (request.params as Record<string, unknown> & { _meta?: { progressToken?: string | number } })._meta?.progressToken;
 
     // Start progress updates - returns unique request ID for this call
     const requestId = startProgressUpdates(toolName, progressToken);

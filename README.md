@@ -5,7 +5,7 @@
 [![GitHub Release](https://img.shields.io/github/v/release/ajhcs/Better-OpenCodeMCP?logo=github&label=GitHub)](https://github.com/ajhcs/Better-OpenCodeMCP/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Open Source](https://img.shields.io/badge/Open%20Source-red.svg)](https://github.com/ajhcs/Better-OpenCodeMCP)
-[![Tests](https://img.shields.io/badge/tests-238%20passing-brightgreen.svg)](https://github.com/ajhcs/Better-OpenCodeMCP)
+[![Tests](https://img.shields.io/badge/tests-257%20passing-brightgreen.svg)](https://github.com/ajhcs/Better-OpenCodeMCP)
 
 </div>
 
@@ -19,7 +19,10 @@ A Model Context Protocol (MCP) server that allows AI assistants to interact with
 - **Async task architecture** - Non-blocking execution with immediate task IDs for background processing
 - **Fixed concurrent execution** - Original had race conditions when multiple tool calls ran simultaneously
 - **Process pooling** - Limits concurrent child processes to prevent resource exhaustion
-- **Comprehensive test suite** - 238 tests covering core functionality, async operations, and concurrency
+- **Comprehensive test suite** - 257 tests covering core functionality, async operations, and concurrency
+- **Security hardened** - No shell injection, input validation, process timeouts
+- **Persistence** - Task state saved to disk for crash recovery
+- **Graceful shutdown** - Proper cleanup on SIGINT/SIGTERM with process termination
 
 ## TLDR: [![Claude](https://img.shields.io/badge/Claude-D97757?logo=claude&logoColor=fff)](#) + Multiple AI Models via OpenCode
 
@@ -100,6 +103,9 @@ Created by `--setup` wizard at `~/.config/opencode-mcp/config.json`:
   "fallbackModel": "deepseek/deepseek-chat",
   "defaults": {
     "agent": "build"
+  },
+  "pool": {
+    "maxConcurrent": 5
   }
 }
 ```
@@ -214,6 +220,26 @@ Send a response to an OpenCode task waiting for input. Resumes task execution.
 - Task must be in `input_required` state
 - Task must have a valid sessionId
 
+### `opencode_cancel` - Cancel Running Task
+
+Cancel a running task, killing the associated process.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `taskId` | string | Yes | The task ID to cancel |
+
+**Returns**: `{ taskId, status: "cancelled", message: "..." }`
+
+### `opencode_health` - System Health Check
+
+Check system health including CLI availability, configuration, and pool status.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| (none) | | | |
+
+**Returns**: `{ cli, config, pool, tasks }` with diagnostics
+
 ### Utility Tools
 
 - **`ping`**: Echo test - returns the provided message
@@ -267,6 +293,26 @@ When a task shows `input_required`:
 - **Explore**: `use opencode in explore mode to investigate the authentication system`
 - **Plan**: `use opencode in plan mode to design a caching strategy`
 - **Build**: `use opencode in build mode to implement the login feature`
+
+## Troubleshooting
+
+### OpenCode CLI not found
+Ensure `opencode` is in your PATH. Test with `opencode --version`.
+
+### Tasks stuck in "working" state
+Tasks have a 15-minute timeout. If a task appears stuck, use `opencode_cancel` to terminate it, or check `opencode_health` for diagnostics.
+
+### Windows-specific notes
+- Process termination uses `taskkill /T /F` for reliable cleanup
+- Paths in config files should use forward slashes
+
+### Debug logging
+Enable verbose logging to diagnose issues:
+```bash
+node dist/index.js --log-level debug
+```
+
+Log levels: `debug`, `info`, `warn` (default), `error`, `silent`
 
 ## Contributing
 
