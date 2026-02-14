@@ -37,19 +37,15 @@ export function getConfigPath(): string {
 
 /**
  * Get the OpenCode state directory where model.json lives.
- * - Windows: %LOCALAPPDATA%\opencode
- * - Unix: ~/.local/state/opencode
+ * OpenCode uses XDG paths on ALL platforms (including Windows):
+ * - XDG_STATE_HOME/opencode if set
+ * - ~/.local/state/opencode otherwise
+ *
+ * Confirmed via `opencode debug paths` which shows:
+ *   state: C:\Users\<user>\.local\state\opencode (Windows)
+ *   state: ~/.local/state/opencode (Unix)
  */
 export function getOpenCodeStateDir(): string {
-  if (process.platform === 'win32') {
-    const localAppData = process.env.LOCALAPPDATA;
-    if (localAppData) {
-      return join(localAppData, 'opencode');
-    }
-    return join(homedir(), 'AppData', 'Local', 'opencode');
-  }
-
-  // Unix - follows XDG spec
   const xdgState = process.env.XDG_STATE_HOME;
   if (xdgState) {
     return join(xdgState, 'opencode');
