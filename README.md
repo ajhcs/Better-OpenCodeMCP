@@ -5,7 +5,7 @@
 [![GitHub Release](https://img.shields.io/github/v/release/ajhcs/Better-OpenCodeMCP?logo=github&label=GitHub)](https://github.com/ajhcs/Better-OpenCodeMCP/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Open Source](https://img.shields.io/badge/Open%20Source-red.svg)](https://github.com/ajhcs/Better-OpenCodeMCP)
-[![Tests](https://img.shields.io/badge/tests-292%20passing-brightgreen.svg)](https://github.com/ajhcs/Better-OpenCodeMCP)
+[![Tests](https://img.shields.io/badge/tests-293%20passing-brightgreen.svg)](https://github.com/ajhcs/Better-OpenCodeMCP)
 
 </div>
 
@@ -19,8 +19,8 @@ A Model Context Protocol (MCP) server that allows AI assistants to interact with
 - **Async task architecture** - Non-blocking execution with immediate task IDs for background processing
 - **Fixed concurrent execution** - Original had race conditions when multiple tool calls ran simultaneously
 - **Process pooling** - Limits concurrent child processes to prevent resource exhaustion
-- **Comprehensive test suite** - 292 tests covering core functionality, async operations, concurrency, process management, and persistence
-- **Security hardened** - No shell injection, input validation, process timeouts
+- **Comprehensive test suite** - 293 tests covering core functionality, async operations, concurrency, process management, and persistence
+- **Security hardened** - Input validation, process timeouts, Zod schema enforcement
 - **Persistence** - Task state saved to disk for crash recovery
 - **Graceful shutdown** - Proper cleanup on SIGINT/SIGTERM with process termination
 
@@ -303,7 +303,9 @@ Ensure `opencode` is in your PATH. Test with `opencode --version`.
 Tasks have a 15-minute timeout. If a task appears stuck, use `opencode_cancel` to terminate it, or check `opencode_health` for diagnostics.
 
 ### Windows-specific notes
+- Process spawning uses `shell: true` to correctly invoke OpenCode's `.cmd` wrapper
 - Process termination uses `taskkill /T /F` for reliable cleanup
+- Model auto-detection reads from XDG state paths (`~/.local/state/opencode/`)
 - Paths in config files should use forward slashes
 
 ### Debug logging
