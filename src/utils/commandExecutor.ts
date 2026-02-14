@@ -29,7 +29,7 @@ function executeCommandInternal(
 
     const childProcess = spawn(command, args, {
       env: process.env,
-      shell: false,
+      shell: true,
       stdio: ["ignore", "pipe", "pipe"],
     });
 

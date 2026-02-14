@@ -13,6 +13,7 @@ import {
   isTextEvent,
   isToolUseEvent,
   isStepFinishEvent,
+  isErrorEvent,
   isCompletionEvent,
   extractSessionId,
   extractText,
@@ -234,6 +235,11 @@ export class TaskManager {
     } else if (isToolUseEvent(event)) {
       // Tool use -> stay working
       // No status change needed
+    } else if (isErrorEvent(event)) {
+      // Error event -> fail the task with the error message
+      const errorMsg = event.error?.data?.message || event.error?.name || "Unknown error";
+      this.updateStatus(taskId, "failed", errorMsg);
+      Logger.error(`Task ${taskId} received error event: ${errorMsg}`);
     } else if (isStepFinishEvent(event)) {
       // Step finish -> check reason
       if (isCompletionEvent(event)) {

@@ -314,10 +314,10 @@ describe("opencodeRespondTool", () => {
 
       expect(child_process.spawn).toHaveBeenCalledWith(
         "opencode",
-        ["--session", "mock-session-123", "--format", "json", "Yes, please continue"],
+        ["run", "--session", "mock-session-123", "--format", "json", "Yes, please continue"],
         expect.objectContaining({
           stdio: ["ignore", "pipe", "pipe"],
-          shell: false,
+          shell: true,
         })
       );
     });

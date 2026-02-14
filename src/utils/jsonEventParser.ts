@@ -127,10 +127,24 @@ export interface StepFinishEvent extends BaseEvent {
 }
 
 /**
+ * Event emitted when OpenCode encounters an error (e.g., model not found).
+ * Contains error details that should be surfaced to the user.
+ */
+export interface ErrorEvent extends BaseEvent {
+  type: "error";
+  error: {
+    name: string;
+    data?: {
+      message?: string;
+    };
+  };
+}
+
+/**
  * Union type of all possible OpenCode events.
  * Use type guards or switch on the `type` field to narrow.
  */
-export type OpenCodeEvent = StepStartEvent | TextEvent | ToolUseEvent | StepFinishEvent;
+export type OpenCodeEvent = StepStartEvent | TextEvent | ToolUseEvent | StepFinishEvent | ErrorEvent;
 
 // ============================================================================
 // Type Guards
@@ -172,6 +186,15 @@ export function isStepFinishEvent(event: OpenCodeEvent): event is StepFinishEven
   return event.type === "step_finish";
 }
 
+/**
+ * Type guard to check if an event is an ErrorEvent.
+ * @param event - The event to check
+ * @returns True if the event is an ErrorEvent
+ */
+export function isErrorEvent(event: OpenCodeEvent): event is ErrorEvent {
+  return event.type === "error";
+}
+
 // ============================================================================
 // Parser Functions
 // ============================================================================
@@ -179,7 +202,7 @@ export function isStepFinishEvent(event: OpenCodeEvent): event is StepFinishEven
 /**
  * Known event types that we support parsing.
  */
-const KNOWN_EVENT_TYPES = new Set(["step_start", "text", "tool_use", "step_finish"]);
+const KNOWN_EVENT_TYPES = new Set(["step_start", "text", "tool_use", "step_finish", "error"]);
 
 /**
  * Parses a single line of NDJSON output from OpenCode.

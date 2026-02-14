@@ -66,8 +66,9 @@ function spawnOpenCodeRespondProcess(
 ): void {
   const taskManager = getTaskManager();
 
-  // Build command arguments for session continuation
+  // Build command arguments for session continuation - must use 'run' subcommand
   const args: string[] = [
+    CLI.SUBCOMMANDS.RUN,
     "--session", sessionId,
     "--format", "json",
     response,
@@ -78,7 +79,7 @@ function spawnOpenCodeRespondProcess(
   // Spawn the process
   const proc = spawn(CLI.COMMANDS.OPENCODE, args, {
     stdio: ["ignore", "pipe", "pipe"],
-    shell: false,
+    shell: true,
   });
 
   activeRespondProcesses.set(taskId, proc);

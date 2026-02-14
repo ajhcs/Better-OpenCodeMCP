@@ -160,7 +160,7 @@ describe("opencodeTool", () => {
         expect.any(Array),
         expect.objectContaining({
           stdio: ["ignore", "pipe", "pipe"],
-          shell: false,
+          shell: true,
         })
       );
     });
@@ -171,6 +171,13 @@ describe("opencodeTool", () => {
       const args = (child_process.spawn as Mock).mock.calls[0][1];
       expect(args).toContain("-m");
       expect(args).toContain("google/gemini-2.5-pro");
+    });
+
+    it("should use 'run' subcommand as first argument", async () => {
+      await opencodeTool.execute({ task: "Test task" });
+
+      const args = (child_process.spawn as Mock).mock.calls[0][1];
+      expect(args[0]).toBe("run");
     });
 
     it("should pass --format json flag", async () => {

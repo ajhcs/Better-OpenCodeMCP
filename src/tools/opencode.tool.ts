@@ -87,8 +87,9 @@ function spawnOpenCodeProcess(
 ): void {
   const taskManager = getTaskManager();
 
-  // Build command arguments
+  // Build command arguments - must use 'run' subcommand for --format json
   const args: string[] = [
+    CLI.SUBCOMMANDS.RUN,
     CLI.FLAGS.MODEL, model,
     "--format", "json",
   ];
@@ -108,7 +109,7 @@ function spawnOpenCodeProcess(
   // Spawn the process
   const proc = spawn(CLI.COMMANDS.OPENCODE, args, {
     stdio: ["ignore", "pipe", "pipe"],
-    shell: false,
+    shell: true,
   });
 
   activeProcesses.set(taskId, proc);
