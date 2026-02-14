@@ -13,6 +13,7 @@ import { getServerConfig } from "../config.js";
 import { Logger } from "../utils/logger.js";
 import { CLI, LIMITS, PROCESS } from "../constants.js";
 import { killProcess } from "../utils/processKill.js";
+import { getPersistence } from "../persistence/sharedPersistence.js";
 
 // ============================================================================
 // Schema
@@ -201,6 +202,14 @@ function processEvent(taskId: string, event: OpenCodeEvent): void {
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     Logger.error(`Failed to process event for task ${taskId}:`, message);
+  }
+
+  // Fire-and-forget event persistence
+  const persistence = getPersistence();
+  if (persistence) {
+    persistence.appendEvent(taskId, event).catch((err) => {
+      Logger.debug(`Failed to persist event: ${err instanceof Error ? err.message : String(err)}`);
+    });
   }
 }
 

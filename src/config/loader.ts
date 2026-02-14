@@ -12,6 +12,9 @@ export interface McpConfig {
   defaults?: {
     agent?: 'build' | 'plan' | 'explore';
   };
+  pool?: {
+    maxConcurrent?: number;
+  };
 }
 
 /**

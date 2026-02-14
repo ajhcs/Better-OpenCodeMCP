@@ -33,7 +33,8 @@ import {
 } from "./tools/index.js";
 import { cleanupActiveProcesses } from "./tools/opencode.tool.js";
 import { cleanupActiveRespondProcesses } from "./tools/opencode-respond.tool.js";
-import { resetTaskManager } from "./tasks/sharedTaskManager.js";
+import { getTaskManager, resetTaskManager } from "./tasks/sharedTaskManager.js";
+import { initPersistence, getPersistence } from "./persistence/index.js";
 import { PROCESS } from "./constants.js";
 
 const server = new Server(
@@ -408,11 +409,21 @@ async function main() {
     Logger.debug("default agent:", config.defaultAgent);
   }
 
+  // Apply config pool size if specified
+  const fileConfig = loadConfig();
+  if (fileConfig?.pool?.maxConcurrent) {
+    const { openCodeProcessPool } = await import("./utils/processPool.js");
+    openCodeProcessPool.setPoolSize(fileConfig.pool.maxConcurrent);
+    Logger.debug(`Pool size set to ${fileConfig.pool.maxConcurrent} from config`);
+  }
+
+  // Initialize persistence (non-fatal on failure)
+  await initPersistence();
+
   const transport = new StdioServerTransport();
   await server.connect(transport);
 
   // Start periodic task purge
-  const { getTaskManager } = await import("./tasks/sharedTaskManager.js");
   purgeInterval = setInterval(() => {
     getTaskManager().purgeCompletedTasks(PROCESS.COMPLETED_TASK_MAX_AGE_MS);
   }, PROCESS.PURGE_INTERVAL_MS);
@@ -441,6 +452,16 @@ function gracefulShutdown(signal: string): void {
     if (ctx.interval) clearInterval(ctx.interval);
   }
   progressContexts.clear();
+
+  // Mark active tasks as failed in persistence
+  const persistence = getPersistence();
+  if (persistence) {
+    const taskManager = getTaskManager();
+    const activeTasks = taskManager.listActiveTasks();
+    for (const task of activeTasks) {
+      persistence.saveTaskMetadata(task.taskId, task, "failed", `Server shutdown (${signal})`).catch(() => {});
+    }
+  }
 
   // Reset task manager (clears timers and tasks)
   resetTaskManager();

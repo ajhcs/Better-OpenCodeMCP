@@ -4,6 +4,7 @@
  */
 
 export { TaskPersistence } from "./taskPersistence.js";
+export { initPersistence, getPersistence, resetPersistence } from "./sharedPersistence.js";
 export type {
   PersistedTaskMetadata,
   TaskResult,

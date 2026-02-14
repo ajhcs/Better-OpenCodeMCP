@@ -50,29 +50,29 @@ function executeCommandInternal(
     });
 
 
-    // CLI level errors
+    // CLI level errors - detect rate limiting / quota exhaustion
     childProcess.stderr.on("data", (data) => {
       stderr += data.toString();
-      // find RESOURCE_EXHAUSTED when gemini-2.5-pro quota is exceeded
-      if (stderr.includes("RESOURCE_EXHAUSTED")) {
-        const modelMatch = stderr.match(/Quota exceeded for quota metric '([^']+)'/);
+
+      // General quota/rate limit detection patterns
+      const quotaPatterns = [
+        /RESOURCE_EXHAUSTED/i,
+        /rate.?limit/i,
+        /too many requests/i,
+        /quota exceeded/i,
+        /\b429\b/,
+      ];
+
+      const isQuotaError = quotaPatterns.some((p) => p.test(stderr));
+      if (isQuotaError) {
+        const modelMatch = stderr.match(/Quota exceeded for quota metric '([^']+)'/) ||
+                           stderr.match(/model['":\s]+([a-zA-Z0-9._/-]+)/);
         const statusMatch = stderr.match(/status["\s]*[:=]\s*(\d+)/);
         const reasonMatch = stderr.match(/"reason":\s*"([^"]+)"/);
         const model = modelMatch ? modelMatch[1] : "Unknown Model";
         const status = statusMatch ? statusMatch[1] : "429";
         const reason = reasonMatch ? reasonMatch[1] : "rateLimitExceeded";
-        const errorJson = {
-          error: {
-            code: parseInt(status),
-            message: `GMCPT: --> Quota exceeded for ${model}`,
-            details: {
-              model: model,
-              reason: reason,
-              statusText: "Too Many Requests -- > try using gemini-2.5-flash by asking",
-            }
-          }
-        };
-        Logger.error(`Gemini Quota Error: ${JSON.stringify(errorJson, null, 2)}`);
+        Logger.error(`Quota/rate limit error: model=${model}, status=${status}, reason=${reason}`);
       }
     });
     childProcess.on("error", (error) => {

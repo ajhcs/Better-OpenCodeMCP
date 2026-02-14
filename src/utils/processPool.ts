@@ -3,6 +3,8 @@
  * Prevents resource exhaustion when many parallel requests come in
  */
 
+import { PROCESS } from "../constants.js";
+
 export interface ProcessPoolConfig {
   maxConcurrent: number;
 }
@@ -16,10 +18,20 @@ interface QueuedTask<T> {
 export class ProcessPool {
   private maxConcurrent: number;
   private running: number = 0;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private queue: QueuedTask<any>[] = [];
 
   constructor(config: ProcessPoolConfig) {
     this.maxConcurrent = config.maxConcurrent;
+  }
+
+  /**
+   * Update the maximum concurrent process limit
+   */
+  setPoolSize(size: number): void {
+    this.maxConcurrent = size;
+    // Process any queued tasks that may now be eligible
+    this.processQueue();
   }
 
   /**
@@ -73,5 +85,5 @@ export class ProcessPool {
   }
 }
 
-// Default pool for opencode processes - limit to 5 concurrent
-export const openCodeProcessPool = new ProcessPool({ maxConcurrent: 5 });
+// Default pool for opencode processes
+export const openCodeProcessPool = new ProcessPool({ maxConcurrent: PROCESS.POOL_SIZE });
