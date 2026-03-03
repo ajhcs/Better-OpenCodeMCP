@@ -318,7 +318,10 @@ Log levels: `debug`, `info`, `warn` (default), `error`, `silent`
 
 ## Contributing
 
-Contributions are welcome! Please open an issue or submit a pull request at [github.com/ajhcs/Better-OpenCodeMCP](https://github.com/ajhcs/Better-OpenCodeMCP).
+Contributions are welcome! Check out the [Contributing Guide](CONTRIBUTING.md) to get started.
+
+- [Good first issues](https://github.com/ajhcs/Better-OpenCodeMCP/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) — great entry points for new contributors
+- [Help wanted](https://github.com/ajhcs/Better-OpenCodeMCP/issues?q=is%3Aissue+is%3Aopen+label%3A%22help+wanted%22) — bigger items where we'd appreciate help
 
 ## License
 
