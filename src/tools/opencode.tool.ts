@@ -45,6 +45,10 @@ const opencodeArgsSchema = z.object({
     .max(LIMITS.MAX_SESSION_TITLE_LENGTH)
     .optional()
     .describe("Human-readable session name for tracking"),
+  workingDirectory: z
+    .string()
+    .optional()
+    .describe("Working directory for task execution"),
 });
 
 // ============================================================================
@@ -83,7 +87,8 @@ function spawnOpenCodeProcess(
   task: string,
   model: string,
   agent?: string,
-  outputGuidance?: string
+  outputGuidance?: string,
+  workingDirectory?: string
 ): void {
   const taskManager = getTaskManager();
 
@@ -96,6 +101,11 @@ function spawnOpenCodeProcess(
 
   if (agent) {
     args.push(CLI.FLAGS.AGENT, agent);
+  }
+
+  // Add working directory if provided
+  if (workingDirectory) {
+    args.push(CLI.FLAGS.DIR, workingDirectory);
   }
 
   // Combine task with output guidance if provided
@@ -257,6 +267,7 @@ NOTE: This is an async operation. The task continues running after this tool ret
     const outputGuidance = args.outputGuidance as string | undefined;
     const model = args.model as string | undefined;
     const sessionTitle = args.sessionTitle as string | undefined;
+    const workingDirectory = args.workingDirectory as string | undefined;
 
     if (!task?.trim()) {
       throw new Error("Task is required and cannot be empty");
@@ -278,7 +289,7 @@ NOTE: This is an async operation. The task continues running after this tool ret
     Logger.debug(`Created task ${taskId}: ${title}`);
 
     // Spawn the OpenCode process (runs in background)
-    spawnOpenCodeProcess(taskId, task, effectiveModel, agent, outputGuidance);
+    spawnOpenCodeProcess(taskId, task, effectiveModel, agent, outputGuidance, workingDirectory);
 
     // Get metadata for response (sessionId will be "" until first event)
     const metadata = taskManager.getTaskMetadata(taskId);

@@ -67,6 +67,7 @@ export const CLI = {
     MODEL: "-m",
     AGENT: "--agent",
     HELP: "--help",
+    DIR: "--dir",
   },
   // Mode values
   MODES: {
