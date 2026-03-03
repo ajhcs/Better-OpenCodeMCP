@@ -79,7 +79,7 @@ function spawnOpenCodeRespondProcess(
   // Spawn the process
   const proc = spawn(CLI.COMMANDS.OPENCODE, args, {
     stdio: ["ignore", "pipe", "pipe"],
-    shell: true,
+    shell: process.platform === "win32",
   });
 
   activeRespondProcesses.set(taskId, proc);
