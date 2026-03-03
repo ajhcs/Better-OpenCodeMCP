@@ -160,7 +160,7 @@ describe("opencodeTool", () => {
         expect.any(Array),
         expect.objectContaining({
           stdio: ["ignore", "pipe", "pipe"],
-          shell: true,
+          shell: process.platform === "win32",
         })
       );
     });
